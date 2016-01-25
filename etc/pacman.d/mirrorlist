@@ -1,0 +1,2 @@
+Server = https://ftp.fau.de/archlinux/$repo/os/$arch
+Server = https://ftp.lysator.liu.se/pub/archlinux/$repo/os/$arch
