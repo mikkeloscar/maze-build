@@ -17,8 +17,8 @@ RUN chmod 'u=r,g=r,o=' /etc/sudoers
 
 # Update and install pkgbuild-introspection
 RUN pacman -Syu pkgbuild-introspection --noconfirm
-# Install python dependencies
-RUN pacman -Syu python python-pip --noconfirm
+# Install go
+RUN pacman -Syu go --noconfirm
 # Clean .pacnew files
 RUN find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
 # Clean pkg cache
@@ -28,13 +28,9 @@ RUN find /var/cache/pacman/pkg -mindepth 1 -delete
 COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 RUN chmod 'u=rwX,g=rX,o=rX' /etc/pacman.d/mirrorlist
 
-# RUN apk-install python3
-RUN mkdir -p /opt/drone
-COPY requirements.txt /opt/drone/
-WORKDIR /opt/drone
-RUN pip install -r requirements.txt
-COPY plugin /opt/drone/
+# Add binary
+ADD drone-pkgbuild /usr/bin
 
 USER ${UGNAME}
 
-ENTRYPOINT ["python", "/opt/drone/plugin/main.py"]
+ENTRYPOINT ["/usr/bin/drone-pkgbuild"]
