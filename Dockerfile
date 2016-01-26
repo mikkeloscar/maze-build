@@ -15,7 +15,9 @@ RUN useradd --uid "${UGID}" --gid "${UGID}" --shell /usr/bin/false "${UGNAME}"
 COPY etc/sudoers /etc/sudoers
 RUN chmod 'u=r,g=r,o=' /etc/sudoers
 
-# Update and install python
+# Update and install pkgbuild-introspection
+RUN pacman -Syu pkgbuild-introspection --noconfirm
+# Install python dependencies
 RUN pacman -Syu python python-pip --noconfirm
 # Clean .pacnew files
 RUN find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;

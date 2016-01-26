@@ -1,2 +1,3 @@
 requests==2.9.1
 drone==0.3.0
+srcinfo=0.0.2
