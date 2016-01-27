@@ -16,42 +16,67 @@ type Repo struct {
 	name     string
 	url      string
 	workdir  string
-	dbPath   string
+	db       string
 	dbCached bool
 }
 
+// Get path to db, downloads it first if needed.
 func (r *Repo) getDB() (string, error) {
 	if r.dbCached {
-		return path.Join(r.workdir, r.dbPath), nil
+		return path.Join(r.workdir, r.db), nil
 	}
 
 	fileName := fmt.Sprintf("%s.db.tar.gz", r.name)
 
-	if strings.HasPrefix(r.url, "file://") {
-		if r.url[len(r.url)-1] == '/' {
-			r.dbPath = r.url + fileName
-		} else {
-			r.dbPath = r.url + "/" + fileName
-		}
-		r.dbCached = true
-		return r.dbPath, nil
-	}
-
 	if strings.HasPrefix(r.url, "http://") {
 		// TODO: handle more db naming
-		filePath, err := r.httpDownload(fileName)
+		_, err := r.httpDownload(fileName)
 		if err != nil {
 			return "", err
 		}
 
-		r.dbPath = filePath
+		r.db = fileName
 		r.dbCached = true
-		return filePath, nil
+		return r.getDB()
+	} else { // local repo
+		if r.url != r.workdir {
+			err := copyFile(path.Join(r.workdir, fileName), path.Join(r.url, fileName))
+			if err != nil {
+				return "", err
+			}
+		}
+
+		r.db = fileName
+		r.dbCached = true
+		return r.getDB()
 	}
 
 	return "", fmt.Errorf("invalid url '%s'", r.url)
 }
 
+// copy file
+func copyFile(dst, src string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, in)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// download db file over http.
 func (r *Repo) httpDownload(file string) (string, error) {
 	filePath := path.Join(r.workdir, file)
 	out, err := os.Create(filePath)
@@ -76,6 +101,9 @@ func (r *Repo) httpDownload(file string) (string, error) {
 	return filePath, nil
 }
 
+// GetUpdated takes a list of package sources and returns a sorted list of the
+// packages that need to be build (because the source is newer than what's in
+// the repo).
 func (r *Repo) GetUpdated(pkgs []*SrcPkg) ([]*SrcPkg, error) {
 	updated := make([]*SrcPkg, 0, len(pkgs))
 	for _, pkg := range pkgs {
