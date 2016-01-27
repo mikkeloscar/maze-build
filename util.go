@@ -28,8 +28,10 @@ func addRepoEntry(path string, r *Repo) error {
 	w := bufio.NewWriter(f)
 
 	lines := strings.Split(string(content), "\n")
+	inserted := false
 	for _, line := range lines {
-		if line == "# :INSERT_REPO:" {
+		if line == "# :INSERT_REPO:" && !inserted {
+			inserted = true
 			_, err = w.WriteString(entry + "\n")
 			if err != nil {
 				return err
@@ -42,7 +44,16 @@ func addRepoEntry(path string, r *Repo) error {
 		}
 	}
 
-	return w.Flush()
+	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
+	if !inserted {
+		return fmt.Errorf("No place to insert repo")
+	}
+
+	return nil
 }
 
 // add pacman.conf from src.
@@ -99,7 +110,7 @@ func setupBuildDirs(base string) (string, string, error) {
 
 func splitRepoDef(repo string) (string, string, error) {
 	split := strings.Split(repo, "=")
-	if len(split) != 2 {
+	if len(split) != 2 || split[0] == "" || split[1] == "" {
 		return "", "", fmt.Errorf("invalid repo defination: '%s'", repo)
 	}
 

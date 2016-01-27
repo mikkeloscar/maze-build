@@ -16,6 +16,10 @@ RUN find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
 # Clean pkg cache
 RUN find /var/cache/pacman/pkg -mindepth 1 -delete
 
+# Add sudoers.test
+COPY etc/sudoers.test /etc/sudoers
+RUN chmod 'u=r,g=r,o=' /etc/sudoers
+
 # copy local src files to container workspace.
 ADD . /go/src/github.com/mikkeloscar/drone-pkgbuild/
 RUN chown "$UGNAME:$UGNAME" /go -R
@@ -25,6 +29,9 @@ USER $UGNAME
 
 # set $GOPATH
 ENV GOPATH /go
+
+# set $DOCKER_TEST for tests run inside docker
+ENV DOCKER_TEST 1
 
 # get go deps
 RUN go get -t github.com/mikkeloscar/drone-pkgbuild/...
