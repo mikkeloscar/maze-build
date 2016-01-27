@@ -1,44 +1,66 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
+	"fmt"
 	"os"
+	"path"
 
 	"github.com/drone/drone-plugin-go/plugin"
 )
 
+type ArchBuild struct {
+	Repo    string   `json:"repo"`
+	AURPkgs []string `json:"aur_pkgs"`
+}
+
 func main() {
-	var repo = plugin.Repo{}
-	var build = plugin.Build{}
-	var vargs = struct {
-		Urls []string `json:"urls"`
-	}{}
-
-	plugin.Param("repo", &repo)
-	plugin.Param("build", &build)
-	plugin.Param("vargs", &vargs)
-	plugin.Parse()
-
-	// data structure
-	data := struct {
-		Repo  plugin.Repo  `json:"repo"`
-		Build plugin.Build `json:"build"`
-	}{repo, build}
-
-	// json payload that will be posted
-	payload, err := json.Marshal(&data)
+	err := run()
 	if err != nil {
+		// TODO: better print error fmt
+		fmt.Println(err)
 		os.Exit(1)
 	}
+}
 
-	// post payload to each url
-	for _, url := range vargs.Urls {
-		resp, err := http.Post(url, "application/json", bytes.NewBuffer(payload))
-		if err != nil {
-			os.Exit(1)
-		}
-		resp.Body.Close()
+func run() error {
+	// var repo = plugin.Repo{}
+	// var build = plugin.Build{}
+	var workspace = plugin.Workspace{}
+	var vargs = ArchBuild{}
+
+	// plugin.Param("repo", &repo)
+	// plugin.Param("build", &build)
+	plugin.Param("workspace", &workspace)
+	plugin.Param("vargs", &vargs)
+	plugin.MustParse()
+
+	buildDir := path.Join(workspace.Path, "drone_pkgbuild")
+	repoPath, srcsPath, err := setupBuildDirs(buildDir)
+	if err != nil {
+		return err
 	}
+
+	repoName, repoUrl, err := splitRepoDef(vargs.Repo)
+
+	pkgRepo := &Repo{
+		name:    repoName,
+		url:     repoUrl,
+		workdir: repoPath,
+	}
+
+	builder := &Builder{
+		repo:    pkgRepo,
+		workdir: srcsPath,
+	}
+
+	aur := &AUR{srcsPath}
+
+	pkgs, err := builder.BuildNew(vargs.AURPkgs, aur)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(pkgs)
+
+	return nil
 }

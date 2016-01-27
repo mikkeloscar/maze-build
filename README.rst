@@ -81,3 +81,10 @@ License
 
 drone-pkgbuild is licensed under the Apache License. A copy is included
 in this repository.
+
+
+```
+drone_pkgbuild/
+ -> repo
+ -> sources
+```
