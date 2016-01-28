@@ -175,13 +175,13 @@ func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
 
 // run command from basedir and print output to stdout.
 func runCmd(baseDir, command string, args ...string) error {
-	// print command being run
-	fmt.Printf("$ %s %s\n", command, strings.Join(args, " "))
-
 	cmd := exec.Command(command, args...)
 	if baseDir != "" {
 		cmd.Dir = baseDir
 	}
+
+	// print command being run
+	fmt.Println("$", strings.Join(cmd.Args, " "))
 
 	tty, err := pty.Start(cmd)
 	if err != nil {
