@@ -15,3 +15,14 @@ publish:
     storage_driver: overlay
     when:
       branch: master
+
+publish:
+  docker:
+    username: $$DOCKER_USER
+    password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
+    repo: mikkeloscar/drone-pkgbuild
+    tag: develop
+    storage_driver: overlay
+    when:
+      branch: develop
