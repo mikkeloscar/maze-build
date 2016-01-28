@@ -9,7 +9,7 @@ clean:
 	go clean -i ./..
 
 deps:
-	go get -t ./..
+	go get -t
 
 docker-run: docker
 	./test_plugin.sh
