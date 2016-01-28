@@ -195,7 +195,8 @@ func runCmd(baseDir, command string, args ...string) error {
 		defer wg.Done()
 		for scanner.Scan() {
 			out := scanner.Text()
-			fmt.Printf("%s\n", out)
+			// fmt.Printf("output:\n *****\n %#v \n *****\n", out)
+			fmt.Printf("%s\n", fmtOutput(out))
 		}
 	}()
 
@@ -207,6 +208,11 @@ func runCmd(baseDir, command string, args ...string) error {
 	wg.Wait()
 
 	return nil
+}
+
+func fmtOutput(output string) string {
+	sections := strings.Split(output, "\r")
+	return sections[len(sections)-1]
 }
 
 // Clone git repository from url to dst
