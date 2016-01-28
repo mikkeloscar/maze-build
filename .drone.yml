@@ -15,4 +15,4 @@ publish:
     when:
       branch: master
     environment:
-      DOCKER_LAUNCH_DEBUG=true
+      - DOCKER_LAUNCH_DEBUG=true
