@@ -12,8 +12,8 @@ RUN \
     useradd --uid "$UGID" --gid "$UGID" --shell /usr/bin/false "${UGNAME}"
 
 RUN \
-    # Update and install pkgbuild-introspection
-    pacman -Syu pkgbuild-introspection --noconfirm && \
+    # Update and install pkgbuild-introspection and jq
+    pacman -Syu pkgbuild-introspection jq --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
     # Clean pkg cache
@@ -32,9 +32,10 @@ RUN \
     chmod 'u=rwX,g=rX,o=rX' /etc/pacman.conf.template && \
     chown "$UGNAME:$UGNAME" /etc/pacman.conf.template
 
+# Add wrapper script
+COPY build_wrapper.sh /usr/bin/build
+
 # Add binary
 COPY drone-pkgbuild /usr/bin
 
-USER $UGNAME
-
-ENTRYPOINT ["/usr/bin/drone-pkgbuild"]
+ENTRYPOINT ["/usr/bin/build"]

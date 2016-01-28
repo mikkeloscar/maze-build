@@ -37,11 +37,8 @@ func run() error {
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	buildDir := path.Join(workspace.Path, "drone_pkgbuild")
-	srcsPath, repoPath, err := setupBuildDirs(buildDir)
-	if err != nil {
-		return err
-	}
+	srcsPath := path.Join(workspace.Path, "drone_pkgbuild", "sources")
+	repoPath := path.Join(workspace.Path, "drone_pkgbuild", "repo")
 
 	// repoName, repoUrl, err := splitRepoDef(vargs.Repo)
 

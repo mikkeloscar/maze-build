@@ -17,6 +17,9 @@ docker run -v $(pwd)/drone_dir:/drone -i mikkeloscar/drone-pkgbuild <<EOF
             "private": "",
             "public": ""
         }
+    },
+    "vargs": {
+        "sign_key": "test key"
     }
 }
 EOF
