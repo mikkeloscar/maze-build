@@ -12,7 +12,6 @@ publish:
     email: $$DOCKER_EMAIL
     repo: mikkeloscar/drone-pkgbuild
     tag: latest
+    storage_driver: overlay
     when:
       branch: master
-    environment:
-      - DOCKER_LAUNCH_DEBUG=true
