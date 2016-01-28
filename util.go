@@ -211,7 +211,7 @@ func runCmd(baseDir, command string, args ...string) error {
 
 // Clone git repository from url to dst
 func gitClone(src, dst string) error {
-	err := runCmd("", "git", "clone", src, dst)
+	err := runCmd("", "git", "clone", "-q", src, dst)
 	if err != nil {
 		return err
 	}
