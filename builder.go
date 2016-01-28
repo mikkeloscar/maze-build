@@ -16,6 +16,7 @@ import (
 type Builder struct {
 	workdir string
 	repo    *Repo
+	// PGPKeys []
 }
 
 // BuildNew checks what packages to build based on related repo and builds
@@ -40,10 +41,7 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 
 // Update build environment.
 func (b *Builder) update() error {
-	cmd := exec.Command("sudo", "pacman", "-Syu", "--noconfirm")
-	cmd.Dir = b.workdir
-
-	return cmd.Run()
+	return b.run(b.workdir, "sudo", "pacman", "-Syu", "--noconfirm")
 }
 
 // Get a sorted list of packages to build.
@@ -88,15 +86,12 @@ func (b *Builder) updatePkgSrcs(pkgs []*SrcPkg) error {
 
 // Check and update if a newer source exist for the package.
 func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
-	cmd := exec.Command("makepkg", "-os", "--noconfirm")
-	cmd.Dir = pkg.Path
-
-	err := cmd.Run()
+	err := b.run(pkg.Path, "makepkg", "-od", "--noconfirm", "--skippgpcheck")
 	if err != nil {
 		return nil, err
 	}
 
-	cmd = exec.Command("mksrcinfo")
+	cmd := exec.Command("mksrcinfo")
 	cmd.Dir = pkg.Path
 	if err != nil {
 		return nil, err
@@ -132,7 +127,7 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 
 // Build package and return a list of resulting package archives.
 func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
-	err := b.run(pkg.Path, "makepkg", "-is", "--noconfirm")
+	err := b.run(pkg.Path, "makepkg", "-is", "--noconfirm", "--skippgpcheck")
 	if err != nil {
 		return nil, err
 	}

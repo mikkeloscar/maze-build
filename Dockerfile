@@ -6,7 +6,7 @@ FROM nfnty/arch-devel:latest
 MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
 
 # Setup build user/group
-ENV UGID='99999' UGNAME='builder'
+ENV UGID='1000' UGNAME='builder'
 RUN \
     groupadd --gid "$UGID" "$UGNAME" && \
     useradd --uid "$UGID" --gid "$UGID" --shell /usr/bin/false "${UGNAME}"

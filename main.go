@@ -27,26 +27,32 @@ func run() error {
 	// var build = plugin.Build{}
 	var system = plugin.System{}
 	var workspace = plugin.Workspace{}
-	var vargs = ArchBuild{}
+	// var vargs = ArchBuild{}
 
 	// plugin.Param("repo", &repo)
 	// plugin.Param("build", &build)
 	plugin.Param("system", &system)
 	plugin.Param("workspace", &workspace)
-	plugin.Param("vargs", &vargs)
+	// plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
 	buildDir := path.Join(workspace.Path, "drone_pkgbuild")
-	repoPath, srcsPath, err := setupBuildDirs(buildDir)
+	srcsPath, repoPath, err := setupBuildDirs(buildDir)
 	if err != nil {
 		return err
 	}
 
-	repoName, repoUrl, err := splitRepoDef(vargs.Repo)
+	// repoName, repoUrl, err := splitRepoDef(vargs.Repo)
+
+	// pkgRepo := &Repo{
+	// 	name:    repoName,
+	// 	url:     repoUrl,
+	// 	workdir: repoPath,
+	// }
 
 	pkgRepo := &Repo{
-		name:    repoName,
-		url:     repoUrl,
+		name:    "repo",
+		url:     repoPath,
 		workdir: repoPath,
 	}
 
@@ -55,9 +61,14 @@ func run() error {
 		workdir: srcsPath,
 	}
 
-	aur := &AUR{srcsPath}
+	// aur := &AUR{srcsPath}
 
-	pkgs, err := builder.BuildNew(vargs.AURPkgs, aur)
+	build, err := parseBuildURLInfo(system.Link, srcsPath)
+	if err != nil {
+		return err
+	}
+
+	pkgs, err := builder.BuildNew(build.Pkgs, build.Src)
 	if err != nil {
 		return err
 	}

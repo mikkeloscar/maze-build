@@ -22,13 +22,13 @@ type SrcPkg struct {
 
 // Get PKGBUILDs from AUR
 func (a *AUR) Get(pkgs []string) ([]*SrcPkg, error) {
-	updates := make(map[string]struct{})
-	err := a.getDeps(pkgs, updates)
+	deps := make(map[string]struct{})
+	err := a.getDeps(pkgs, deps)
 	if err != nil {
 		return nil, err
 	}
 
-	err = a.getSourceRepos(updates)
+	err = a.getSourceRepos(deps)
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +36,11 @@ func (a *AUR) Get(pkgs []string) ([]*SrcPkg, error) {
 	var srcPkg *SrcPkg
 	var filePath string
 
-	srcPkgs := make([]*SrcPkg, 0, len(updates))
+	srcPkgs := make([]*SrcPkg, 0, len(deps))
 
 	// get a list of PKGBUILDs/SrcPkgs
-	for u, _ := range updates {
-		filePath = path.Join(a.workdir, u, ".SRCINFO")
+	for d, _ := range deps {
+		filePath = path.Join(a.workdir, d, ".SRCINFO")
 
 		pkgb, err := pkgbuild.ParseSRCINFO(filePath)
 		if err != nil {
@@ -48,7 +48,7 @@ func (a *AUR) Get(pkgs []string) ([]*SrcPkg, error) {
 		}
 		srcPkg = &SrcPkg{
 			PKGBUILD: pkgb,
-			Path:     path.Join(a.workdir, u),
+			Path:     path.Join(a.workdir, d),
 		}
 		srcPkgs = append(srcPkgs, srcPkg)
 	}
@@ -114,6 +114,7 @@ func (a *AUR) updateRepo(pkg string, c chan<- error) {
 }
 
 // Clone git repository at url to dst
+// TODO: add output
 func gitClone(url, dst string) error {
 	cmd := exec.Command("git", "clone", url, dst)
 	out, err := cmd.CombinedOutput()

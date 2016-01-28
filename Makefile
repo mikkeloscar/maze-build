@@ -11,8 +11,11 @@ clean:
 deps:
 	go get -t ./..
 
+docker-run: docker
+	./test_plugin.sh
+
 docker:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s"
 	docker build --rm -t $(IMAGE) .
 
 docker-test: docker

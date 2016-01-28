@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -134,3 +135,37 @@ func splitRepoDef(repo string) (string, string, error) {
 
 // 	return lines, nil
 // }
+
+type Build struct {
+	Pkgs []string
+	Src  *AUR
+}
+
+func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	build := &Build{}
+
+	if v, ok := m["pkgs"]; ok {
+		build.Pkgs = v
+	}
+
+	if v, ok := m["src"]; ok {
+		switch v[0] {
+		case "aur":
+			fallthrough
+		default:
+			build.Src = &AUR{srcPath}
+		}
+	}
+
+	return build, nil
+}
