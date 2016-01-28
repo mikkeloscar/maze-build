@@ -7,9 +7,9 @@ build:
 
 publish:
   docker:
-    user: $$DOCKER_USER
-    email: $$DOCKER_EMAIL
+    username: $$DOCKER_USER
     password: $$DOCKER_PASS
+    email: $$DOCKER_EMAIL
     repo: mikkeloscar/drone-pkgbuild
     tag: latest
     when:
