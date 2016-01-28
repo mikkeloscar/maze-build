@@ -10,11 +10,12 @@ MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
 USER root
 
 # Install go
-RUN pacman -Syu go --noconfirm
-# Clean .pacnew files
-RUN find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
-# Clean pkg cache
-RUN find /var/cache/pacman/pkg -mindepth 1 -delete
+RUN \
+    pacman -Syu go --noconfirm && \
+    # Clean .pacnew files
+    find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
+    # Clean pkg cache
+    find /var/cache/pacman/pkg -mindepth 1 -delete
 
 # Add sudoers.test
 COPY etc/sudoers.test /etc/sudoers

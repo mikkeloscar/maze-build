@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
 
+	"github.com/kr/pty"
 	"github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -20,12 +24,14 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 	// make sure environment is up to date
 	err := b.update()
 	if err != nil {
+		fmt.Println("ERROR ONE!")
 		return nil, err
 	}
 
 	// get packages that should be built
 	srcPkgs, err := b.getBuildPkgs(pkgs, aur)
 	if err != nil {
+		fmt.Println("ERROR TWO!")
 		return nil, err
 	}
 
@@ -44,6 +50,7 @@ func (b *Builder) update() error {
 func (b *Builder) getBuildPkgs(pkgs []string, aur *AUR) ([]*SrcPkg, error) {
 	pkgSrcs, err := aur.Get(pkgs)
 	if err != nil {
+		fmt.Println("ERROR THREE!")
 		return nil, err
 	}
 
@@ -59,6 +66,7 @@ func (b *Builder) getBuildPkgs(pkgs []string, aur *AUR) ([]*SrcPkg, error) {
 
 	err = b.updatePkgSrcs(updates)
 	if err != nil {
+		fmt.Println("ERROR FOUR!")
 		return nil, err
 	}
 
@@ -70,6 +78,7 @@ func (b *Builder) updatePkgSrcs(pkgs []*SrcPkg) error {
 	for _, pkg := range pkgs {
 		_, err := b.updatePkgSrc(pkg)
 		if err != nil {
+			fmt.Println("ERROR FIVE!")
 			return err
 		}
 	}
@@ -123,11 +132,7 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 
 // Build package and return a list of resulting package archives.
 func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
-	cmd := exec.Command("makepkg", "-is", "--noconfirm")
-	cmd.Dir = pkg.Path
-
-	// TODO: handle output
-	err := cmd.Run()
+	err := b.run(pkg.Path, "makepkg", "-is", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}
@@ -147,4 +152,34 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
 	}
 
 	return pkgs, nil
+}
+
+func (b *Builder) run(baseDir, command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+	cmd.Dir = baseDir
+
+	tty, err := pty.Start(cmd)
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(tty)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for scanner.Scan() {
+			out := scanner.Text()
+			fmt.Printf("%s\n", out)
+		}
+	}()
+
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+
+	wg.Wait()
+
+	return nil
 }

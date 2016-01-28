@@ -92,6 +92,10 @@ func TestSettingUpBuildDirs(t *testing.T) {
 	assert.NoError(t, err, "should not fail")
 	assert.Equal(t, sources, path.Join(base, "sources"), "should be equal")
 	assert.Equal(t, repo, path.Join(base, "repo"), "should be equal")
+	_, err = os.Stat(sources)
+	assert.NoError(t, err, "should not fail")
+	_, err = os.Stat(repo)
+	assert.NoError(t, err, "should not fail")
 
 	// cleanup
 	err = os.RemoveAll(base)

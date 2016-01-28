@@ -25,11 +25,13 @@ func main() {
 func run() error {
 	// var repo = plugin.Repo{}
 	// var build = plugin.Build{}
+	var system = plugin.System{}
 	var workspace = plugin.Workspace{}
 	var vargs = ArchBuild{}
 
 	// plugin.Param("repo", &repo)
 	// plugin.Param("build", &build)
+	plugin.Param("system", &system)
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()

@@ -94,8 +94,11 @@ func (a *AUR) getSourceRepos(pkgs map[string]struct{}) error {
 	}
 
 	if len(errors) > 0 {
-		// TODO: maybe add more info
-		return fmt.Errorf("errors while fetching sources")
+		msg := "errors while fetching sources: from AUR\n"
+		for _, err := range errors {
+			msg += fmt.Sprintf("%s * %s\n", msg, err.Error())
+		}
+		return fmt.Errorf(msg)
 	}
 
 	return nil

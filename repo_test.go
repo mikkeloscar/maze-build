@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/mikkeloscar/gopkgbuild"
@@ -69,4 +70,23 @@ func TestIsNew(t *testing.T) {
 	new, err = repo2.IsNew(pkg)
 	assert.NoError(t, err, "should not fail")
 	assert.True(t, new, "should be true")
+}
+
+// Test GetUpdated.
+func TestGetUpdated(t *testing.T) {
+	baseDir := "build_home_test"
+	aurSrc = &AUR{baseDir + "/sources"}
+
+	_, _, err := setupBuildDirs(baseDir)
+	assert.NoError(t, err, "should not fail")
+
+	pkgs, err := aurSrc.Get([]string{"wlc-git"})
+	assert.NoError(t, err, "should not fail")
+
+	_, err = repo2.GetUpdated(pkgs)
+	assert.NoError(t, err, "should not fail")
+
+	// cleanup
+	err = os.RemoveAll(baseDir)
+	assert.NoError(t, err, "should not fail")
 }

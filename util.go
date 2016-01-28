@@ -100,7 +100,7 @@ func setupBuildDirs(base string) (string, string, error) {
 	}
 
 	sources := path.Join(base, "sources")
-	err = os.MkdirAll(repo, 0755)
+	err = os.MkdirAll(sources, 0755)
 	if err != nil {
 		return "", "", err
 	}
