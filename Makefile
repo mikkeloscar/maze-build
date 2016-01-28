@@ -14,8 +14,7 @@ deps:
 docker-run: docker
 	./test_plugin.sh
 
-docker:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s"
+docker: build
 	docker build --rm -t $(IMAGE) .
 
 docker-test: docker
@@ -23,6 +22,6 @@ docker-test: docker
 	docker run --rm $(IMAGE)-test
 
 $(EXECUTABLE): $(wildcard *.go)
-	go build
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s"
 
 build: $(EXECUTABLE)

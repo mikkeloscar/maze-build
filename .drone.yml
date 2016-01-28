@@ -1,0 +1,15 @@
+build:
+  image: golang:1.5
+  commands:
+    - make deps
+    - make build
+    - go test
+
+publish:
+  docker:
+    email: $$DOCKER_EMAIL
+    auth: $$DOCKER_AUTH
+    repo: mikkeloscar/drone-pkgbuild
+    tag: latest
+    when:
+      branch: master
