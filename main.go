@@ -11,6 +11,7 @@ import (
 type ArchBuild struct {
 	Repo    string   `json:"repo"`
 	AURPkgs []string `json:"aur_pkgs"`
+	SignKey string   `json:"sign_key"`
 }
 
 func main() {
@@ -27,13 +28,13 @@ func run() error {
 	// var build = plugin.Build{}
 	var system = plugin.System{}
 	var workspace = plugin.Workspace{}
-	// var vargs = ArchBuild{}
+	var vargs = ArchBuild{}
 
 	// plugin.Param("repo", &repo)
 	// plugin.Param("build", &build)
 	plugin.Param("system", &system)
 	plugin.Param("workspace", &workspace)
-	// plugin.Param("vargs", &vargs)
+	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
 	buildDir := path.Join(workspace.Path, "drone_pkgbuild")
@@ -61,11 +62,18 @@ func run() error {
 		workdir: srcsPath,
 	}
 
+	fmt.Printf("USING KEY: %s\n", vargs.SignKey)
+
 	// aur := &AUR{srcsPath}
 
-	build, err := parseBuildURLInfo(system.Link, srcsPath)
-	if err != nil {
-		return err
+	// build, err := parseBuildURLInfo(system.Link, srcsPath)
+	// if err != nil {
+	// 	return err
+	// }
+
+	build := &Build{
+		Pkgs: []string{"sway-git"},
+		Src:  &AUR{srcsPath},
 	}
 
 	pkgs, err := builder.BuildNew(build.Pkgs, build.Src)
