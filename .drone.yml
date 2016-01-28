@@ -14,3 +14,5 @@ publish:
     tag: latest
     when:
       branch: master
+    environment:
+      DOCKER_LAUNCH_DEBUG=true
