@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -9,16 +8,6 @@ import (
 )
 
 var a = AUR{"mockfiles"}
-
-// Test cloning from git.
-func TestGitClone(t *testing.T) {
-	dst := "mockfiles/sway-git"
-	err := gitClone(fmt.Sprintf(aurCloneURL, "sway-git"), dst)
-	assert.NoError(t, err, "should not fail")
-
-	err = os.RemoveAll(dst)
-	assert.NoError(t, err, "should not fail")
-}
 
 // Test getting deps from AUR.
 func TestGetDeps(t *testing.T) {

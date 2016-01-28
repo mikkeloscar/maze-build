@@ -9,6 +9,9 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
+
+	"github.com/kr/pty"
 )
 
 // add repo entry to the pacman.conf file specified by path.
@@ -168,4 +171,50 @@ func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
 	}
 
 	return build, nil
+}
+
+// run command from basedir and print output to stdout.
+func runCmd(baseDir, command string, args ...string) error {
+	// print command being run
+	fmt.Printf("$ %s %s\n", command, strings.Join(args, " "))
+
+	cmd := exec.Command(command, args...)
+	if baseDir != "" {
+		cmd.Dir = baseDir
+	}
+
+	tty, err := pty.Start(cmd)
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(tty)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for scanner.Scan() {
+			out := scanner.Text()
+			fmt.Printf("%s\n", out)
+		}
+	}()
+
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+
+	wg.Wait()
+
+	return nil
+}
+
+// Clone git repository from url to dst
+func gitClone(src, dst string) error {
+	err := runCmd("", "git", "clone", src, dst)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

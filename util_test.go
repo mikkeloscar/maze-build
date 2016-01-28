@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -122,4 +123,15 @@ func TestSplitRepoDef(t *testing.T) {
 	repoDef = "name="
 	_, _, err = splitRepoDef(repoDef)
 	assert.Error(t, err, "should fail")
+}
+
+// Test cloning from git.
+func TestGitClone(t *testing.T) {
+	dst := "mockfiles/sway-git"
+
+	err := gitClone(fmt.Sprintf(aurCloneURL, "sway-git"), dst)
+	assert.NoError(t, err, "should not fail")
+
+	err = os.RemoveAll(dst)
+	assert.NoError(t, err, "should not fail")
 }

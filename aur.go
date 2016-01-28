@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
 	"path"
 
 	"github.com/mikkeloscar/aur"
@@ -108,20 +107,6 @@ func (a *AUR) getSourceRepos(pkgs map[string]struct{}) error {
 func (a *AUR) updateRepo(pkg string, c chan<- error) {
 	url := fmt.Sprintf(aurCloneURL, pkg)
 
-	// TODO implement version that can pull instead of clone
 	err := gitClone(url, path.Join(a.workdir, pkg))
 	c <- err
-}
-
-// Clone git repository at url to dst
-// TODO: add output
-func gitClone(url, dst string) error {
-	cmd := exec.Command("git", "clone", url, dst)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		// TODO: correct error message?
-		return fmt.Errorf("%s", out)
-	}
-
-	return nil
 }
