@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"path"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/mikkeloscar/gopkgbuild"
 )
 
@@ -22,14 +22,12 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 	// make sure environment is up to date
 	err := b.update()
 	if err != nil {
-		fmt.Println("ERROR ONE!")
 		return nil, err
 	}
 
 	// get packages that should be built
 	srcPkgs, err := b.getBuildPkgs(pkgs, aur)
 	if err != nil {
-		fmt.Println("ERROR TWO!")
 		return nil, err
 	}
 
@@ -38,14 +36,15 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 
 // Update build environment.
 func (b *Builder) update() error {
+	log.Printf("Updating packages")
 	return runCmd(b.workdir, "sudo", "pacman", "-Syu", "--noconfirm")
 }
 
 // Get a sorted list of packages to build.
 func (b *Builder) getBuildPkgs(pkgs []string, aur *AUR) ([]*SrcPkg, error) {
+	log.Printf("Fetching build sources+dependencies for %s", strings.Join(pkgs, ", "))
 	pkgSrcs, err := aur.Get(pkgs)
 	if err != nil {
-		fmt.Println("ERROR THREE!")
 		return nil, err
 	}
 
@@ -61,7 +60,6 @@ func (b *Builder) getBuildPkgs(pkgs []string, aur *AUR) ([]*SrcPkg, error) {
 
 	err = b.updatePkgSrcs(updates)
 	if err != nil {
-		fmt.Println("ERROR FOUR!")
 		return nil, err
 	}
 
@@ -73,7 +71,6 @@ func (b *Builder) updatePkgSrcs(pkgs []*SrcPkg) error {
 	for _, pkg := range pkgs {
 		_, err := b.updatePkgSrc(pkg)
 		if err != nil {
-			fmt.Println("ERROR FIVE!")
 			return err
 		}
 	}
@@ -83,6 +80,13 @@ func (b *Builder) updatePkgSrcs(pkgs []*SrcPkg) error {
 
 // Check and update if a newer source exist for the package.
 func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
+	p := pkg.PKGBUILD
+	if len(p.Pkgnames) > 1 || p.Pkgnames[0] != p.Pkgbase {
+		log.Printf("Checking for new version of %s:(%s)", p.Pkgbase, strings.Join(p.Pkgnames, ", "))
+	} else {
+		log.Printf("Checking for new version of %s", p.Pkgbase)
+	}
+
 	err := runCmd(pkg.Path, "makepkg", "--nobuild", "--nodeps", "--noconfirm")
 	if err != nil {
 		return nil, err
@@ -124,6 +128,13 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 
 // Build package and return a list of resulting package archives.
 func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
+	p := pkg.PKGBUILD
+	if len(p.Pkgnames) > 1 || p.Pkgnames[0] != p.Pkgbase {
+		log.Printf("Building packages %s:(%s)", p.Pkgbase, strings.Join(p.Pkgnames, ", "))
+	} else {
+		log.Printf("Building packages %s", p.Pkgbase)
+	}
+
 	err := runCmd(pkg.Path, "makepkg", "--install", "--syncdeps", "--noconfirm")
 	if err != nil {
 		return nil, err

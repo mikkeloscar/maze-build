@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/drone/drone-plugin-go/plugin"
 )
 
@@ -15,12 +17,22 @@ type ArchBuild struct {
 }
 
 func main() {
+	// configure log
+	log.SetFormatter(new(formatter))
+
 	err := run()
 	if err != nil {
-		// TODO: better print error fmt
-		fmt.Println(err)
+		log.Error(err)
 		os.Exit(1)
 	}
+}
+
+type formatter struct{}
+
+func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
+	buf := &bytes.Buffer{}
+	fmt.Fprintf(buf, "[%s] %s\n", entry.Level.String(), entry.Message)
+	return buf.Bytes(), nil
 }
 
 func run() error {
