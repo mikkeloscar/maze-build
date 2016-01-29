@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 	"sync"
 
@@ -95,23 +94,6 @@ func addMirror(mirror, tmpFile string) error {
 	return exec.Command("sudo", "mv", tmpFile, "/etc/pacman.d/mirrorlist").Run()
 }
 
-// create buildirs and return full path to repo base dir and sources base dir.
-func setupBuildDirs(base string) (string, string, error) {
-	repo := path.Join(base, "repo")
-	err := os.MkdirAll(repo, 0755)
-	if err != nil {
-		return "", "", err
-	}
-
-	sources := path.Join(base, "sources")
-	err = os.MkdirAll(sources, 0755)
-	if err != nil {
-		return "", "", err
-	}
-
-	return sources, repo, nil
-}
-
 func splitRepoDef(repo string) (string, string, error) {
 	split := strings.Split(repo, "=")
 	if len(split) != 2 || split[0] == "" || split[1] == "" {
@@ -120,24 +102,6 @@ func splitRepoDef(repo string) (string, string, error) {
 
 	return split[0], split[1], nil
 }
-
-// Get a list of aur packages defined in repo.
-// TODO: add more ways to define/find packages.
-// func getPkgs(base string) ([]string, error) {
-// 	aurFile := path.Join(base, "aur_packages")
-// 	content, err := ioutil.ReadFile(aurFile)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// TODO: add more options like custom dependencies etc.
-// 	lines := strings.Split(string(content), "\n")
-// 	if len(lines) == 0 {
-// 		return nil, fmt.Errorf("no packages found")
-// 	}
-
-// 	return lines, nil
-// }
 
 type Build struct {
 	Pkgs []string
@@ -195,7 +159,6 @@ func runCmd(baseDir, command string, args ...string) error {
 		defer wg.Done()
 		for scanner.Scan() {
 			out := scanner.Text()
-			// fmt.Printf("output:\n *****\n %#v \n *****\n", out)
 			fmt.Printf("%s\n", fmtOutput(out))
 		}
 	}()
@@ -210,6 +173,7 @@ func runCmd(baseDir, command string, args ...string) error {
 	return nil
 }
 
+// handles progress bar output (only shows the last status line)..
 func fmtOutput(output string) string {
 	sections := strings.Split(output, "\r")
 	return sections[len(sections)-1]

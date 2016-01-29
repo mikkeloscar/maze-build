@@ -11,9 +11,6 @@ clean:
 deps:
 	go get -t
 
-docker-run: docker
-	./test_plugin.sh
-
 docker: build
 	docker build --rm -t $(IMAGE) .
 

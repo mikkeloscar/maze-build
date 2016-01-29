@@ -55,11 +55,10 @@ func run() error {
 	}
 
 	builder := &Builder{
-		repo:    pkgRepo,
 		workdir: srcsPath,
+		repo:    pkgRepo,
+		config:  &vargs,
 	}
-
-	fmt.Printf("USING KEY: %s\n", vargs.SignKey)
 
 	// aur := &AUR{srcsPath}
 

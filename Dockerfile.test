@@ -18,7 +18,7 @@ RUN \
     find /var/cache/pacman/pkg -mindepth 1 -delete
 
 # Add sudoers.test
-COPY etc/sudoers.test /etc/sudoers
+COPY contrib/etc/sudoers.test /etc/sudoers
 RUN chmod 'u=r,g=r,o=' /etc/sudoers
 
 # copy local src files to container workspace.

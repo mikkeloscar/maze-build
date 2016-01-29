@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,6 +24,23 @@ var (
 	}
 	aurSrc = &AUR{baseDir + "/sources"}
 )
+
+// create buildirs and return full path to repo base dir and sources base dir.
+func setupBuildDirs(base string) (string, string, error) {
+	repo := path.Join(base, "repo")
+	err := os.MkdirAll(repo, 0755)
+	if err != nil {
+		return "", "", err
+	}
+
+	sources := path.Join(base, "sources")
+	err = os.MkdirAll(sources, 0755)
+	if err != nil {
+		return "", "", err
+	}
+
+	return sources, repo, nil
+}
 
 func TestUpdateBuild(t *testing.T) {
 	if os.Getenv("DOCKER_TEST") != "1" {
