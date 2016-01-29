@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os/exec"
 	"path"
@@ -31,13 +32,36 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 		return nil, err
 	}
 
-	return b.buildPkgs(srcPkgs)
+	if len(srcPkgs) == 0 {
+		log.Print("All packages up to date, nothing to build")
+		return nil, nil
+	}
+
+	buildPkgs, err := b.buildPkgs(srcPkgs)
+	if err != nil {
+		return nil, err
+	}
+
+	successLog(buildPkgs)
+	return buildPkgs, nil
+}
+
+// Write packages built to the log.
+func successLog(pkgs []string) {
+	var buf bytes.Buffer
+	buf.WriteString("Built packages:")
+	for _, pkg := range pkgs {
+		buf.WriteString("\n * ")
+		buf.WriteString(path.Base(pkg))
+	}
+
+	log.Print(buf.String())
 }
 
 // Update build environment.
 func (b *Builder) update() error {
 	log.Printf("Updating packages")
-	return runCmd(b.workdir, "sudo", "pacman", "-Syu", "--noconfirm")
+	return runCmd(b.workdir, "sudo", "pacman", "--sync", "--refresh", "--sysupgrade", "--noconfirm")
 }
 
 // Get a sorted list of packages to build.
@@ -130,9 +154,9 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
 	p := pkg.PKGBUILD
 	if len(p.Pkgnames) > 1 || p.Pkgnames[0] != p.Pkgbase {
-		log.Printf("Building packages %s:(%s)", p.Pkgbase, strings.Join(p.Pkgnames, ", "))
+		log.Printf("Building package %s:(%s)", p.Pkgbase, strings.Join(p.Pkgnames, ", "))
 	} else {
-		log.Printf("Building packages %s", p.Pkgbase)
+		log.Printf("Building package %s", p.Pkgbase)
 	}
 
 	err := runCmd(pkg.Path, "makepkg", "--install", "--syncdeps", "--noconfirm")
