@@ -103,12 +103,12 @@ func splitRepoDef(repo string) (string, string, error) {
 	return split[0], split[1], nil
 }
 
-type Build struct {
+type build struct {
 	Pkgs []string
 	Src  *AUR
 }
 
-func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
+func parseBuildURLInfo(uri, srcPath string) (*build, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
 		return nil, err
 	}
 
-	build := &Build{}
+	build := &build{}
 
 	if v, ok := m["pkgs"]; ok {
 		build.Pkgs = v

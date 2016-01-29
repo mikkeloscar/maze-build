@@ -13,6 +13,7 @@ import (
 	"github.com/mikkeloscar/gopkgbuild"
 )
 
+// BuiltPkg defines a built package and optional signature file.
 type BuiltPkg struct {
 	Pkg       string
 	Signature string
@@ -26,6 +27,7 @@ func (b *BuiltPkg) String() string {
 	return path.Base(b.Pkg)
 }
 
+// Builder is used to build arch packages.
 type Builder struct {
 	workdir string
 	repo    *Repo

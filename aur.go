@@ -10,10 +10,13 @@ import (
 
 const aurCloneURL = "https://aur.archlinux.org/%s.git"
 
+// AUR is used to fetch git sources from AUR.
 type AUR struct {
 	workdir string
 }
 
+// SrcPkg describes a source package including path to basedir of the package
+// and a parsed version of the PKGBUILD.
 type SrcPkg struct {
 	PKGBUILD *pkgbuild.PKGBUILD
 	Path     string
@@ -38,7 +41,7 @@ func (a *AUR) Get(pkgs []string) ([]*SrcPkg, error) {
 	srcPkgs := make([]*SrcPkg, 0, len(deps))
 
 	// get a list of PKGBUILDs/SrcPkgs
-	for d, _ := range deps {
+	for d := range deps {
 		filePath = path.Join(a.workdir, d, ".SRCINFO")
 
 		pkgb, err := pkgbuild.ParseSRCINFO(filePath)
@@ -79,11 +82,11 @@ func (a AUR) getDeps(pkgs []string, updates map[string]struct{}) error {
 func (a *AUR) getSourceRepos(pkgs map[string]struct{}) error {
 	clone := make(chan error)
 
-	for pkg, _ := range pkgs {
+	for pkg := range pkgs {
 		go a.updateRepo(pkg, clone)
 	}
 
-	errors := make([]error, 0)
+	var errors []error
 
 	for range pkgs {
 		err := <-clone

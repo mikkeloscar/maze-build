@@ -4,8 +4,9 @@ import (
 	"fmt"
 )
 
+// TopologicalSort sorts pkgs in topological order.
 func TopologicalSort(pkgs []*SrcPkg) ([]*SrcPkg, error) {
-	sorter := NewSorter(pkgs)
+	sorter := newSorter(pkgs)
 	return sorter.topologicalSort()
 }
 
@@ -33,7 +34,7 @@ func createGraph(pkgs []*SrcPkg) map[*node]struct{} {
 		}
 	}
 
-	for node, _ := range nodes {
+	for node := range nodes {
 		for _, dep := range node.pkg.PKGBUILD.BuildDepends() {
 			if n, ok := tmpNodes[dep.Name]; ok {
 				// ignore if split package that depend on
@@ -53,7 +54,7 @@ type sorter struct {
 	l        []*SrcPkg
 }
 
-func NewSorter(pkgs []*SrcPkg) *sorter {
+func newSorter(pkgs []*SrcPkg) *sorter {
 	return &sorter{
 		unmarked: createGraph(pkgs),
 		l:        make([]*SrcPkg, 0, len(pkgs)),
@@ -73,7 +74,7 @@ func (s *sorter) topologicalSort() ([]*SrcPkg, error) {
 }
 
 func (s *sorter) getUnmarked() *node {
-	for n, _ := range s.unmarked {
+	for n := range s.unmarked {
 		return n
 	}
 
@@ -90,7 +91,7 @@ func (s *sorter) visit(n *node) error {
 	}
 
 	n.tmp = true
-	for m, _ := range n.depends {
+	for m := range n.depends {
 		err := s.visit(m)
 		if err != nil {
 			return err

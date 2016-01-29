@@ -11,6 +11,7 @@ import (
 	"github.com/mikkeloscar/maze-repo/repo"
 )
 
+// ArchBuild defines the vargs passed from .drone.yml.
 type ArchBuild struct {
 	Repo     string `json:"repo"`
 	SignKey  string `json:"sign_key"`
@@ -87,7 +88,7 @@ func run() error {
 	// 	return err
 	// }
 
-	build := &Build{
+	build := &build{
 		Pkgs: []string{"linux-ck"},
 		Src:  &AUR{srcsPath},
 	}

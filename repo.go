@@ -11,6 +11,7 @@ import (
 	"github.com/mikkeloscar/maze-repo/repo"
 )
 
+// Repo defines a local copy of a remote arch repository.
 type Repo struct {
 	url      string
 	dbCached bool
@@ -34,17 +35,18 @@ func (r *Repo) fetchDB() error {
 
 		r.dbCached = true
 		return nil
-	} else { // local repo
-		if r.url != r.local.Path {
-			err := copyFile(r.local.DB(), path.Join(r.url, fileName))
-			if err != nil {
-				return err
-			}
-		}
-
-		r.dbCached = true
-		return nil
 	}
+
+	// else local repo
+	if r.url != r.local.Path {
+		err := copyFile(r.local.DB(), path.Join(r.url, fileName))
+		if err != nil {
+			return err
+		}
+	}
+
+	r.dbCached = true
+	return nil
 }
 
 // copy file
