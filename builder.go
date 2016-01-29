@@ -29,7 +29,7 @@ func (b *BuiltPkg) String() string {
 type Builder struct {
 	workdir string
 	repo    *Repo
-	config  *ArchBuild
+	config  ArchBuild
 }
 
 // BuildNew checks what packages to build based on related repo and builds

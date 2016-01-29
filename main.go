@@ -74,7 +74,7 @@ func run() error {
 	builder := &Builder{
 		workdir: srcsPath,
 		repo:    pkgRepo,
-		config:  &vargs,
+		config:  vargs,
 	}
 
 	// aur := &AUR{srcsPath}
