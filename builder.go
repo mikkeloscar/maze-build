@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"path"
@@ -11,6 +12,19 @@ import (
 	"github.com/mikkeloscar/gopkgbuild"
 )
 
+type BuiltPkg struct {
+	Pkg       string
+	Signature string
+}
+
+func (b *BuiltPkg) String() string {
+	if b.Signature != "" {
+		return fmt.Sprintf("%s (%s)", b.Pkg, b.Signature)
+	}
+
+	return b.Pkg
+}
+
 type Builder struct {
 	workdir string
 	repo    *Repo
@@ -19,7 +33,7 @@ type Builder struct {
 
 // BuildNew checks what packages to build based on related repo and builds
 // those that have been updated.
-func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
+func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]*BuiltPkg, error) {
 	// make sure environment is up to date
 	err := b.update()
 	if err != nil {
@@ -47,12 +61,12 @@ func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]string, error) {
 }
 
 // Write packages built to the log.
-func successLog(pkgs []string) {
+func successLog(pkgs []*BuiltPkg) {
 	var buf bytes.Buffer
 	buf.WriteString("Built packages:")
 	for _, pkg := range pkgs {
 		buf.WriteString("\n * ")
-		buf.WriteString(path.Base(pkg))
+		buf.WriteString(pkg.String())
 	}
 
 	log.Print(buf.String())
@@ -135,8 +149,8 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 }
 
 // Build a list of packages.
-func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
-	buildPkgs := make([]string, 0, len(pkgs))
+func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]*BuiltPkg, error) {
+	buildPkgs := make([]*BuiltPkg, 0, len(pkgs))
 
 	for _, pkg := range pkgs {
 		pkgPaths, err := b.buildPkg(pkg)
@@ -151,7 +165,7 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 }
 
 // Build package and return a list of resulting package archives.
-func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
+func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	p := pkg.PKGBUILD
 	if len(p.Pkgnames) > 1 || p.Pkgnames[0] != p.Pkgbase {
 		log.Printf("Building package %s:(%s)", p.Pkgbase, strings.Join(p.Pkgnames, ", "))
@@ -169,12 +183,24 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
 		return nil, err
 	}
 
-	pkgs := make([]string, 0, 1)
+	pkgs := make([]*BuiltPkg, 0, 1)
 
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), "pkg.tar.xz") {
-			pkgPath := path.Join(pkg.Path, f.Name())
-			pkgs = append(pkgs, pkgPath)
+			builtPkg := &BuiltPkg{
+				Pkg: path.Join(pkg.Path, f.Name()),
+			}
+			pkgs = append(pkgs, builtPkg)
+		}
+	}
+
+	for _, f := range files {
+		if strings.HasSuffix(f.Name(), "pkg.tar.xz.sig") {
+			for _, p := range pkgs {
+				if path.Base(p.Pkg) == f.Name()[:len(f.Name())-4] {
+					p.Signature = path.Join(pkg.Path, f.Name())
+				}
+			}
 		}
 	}
 
