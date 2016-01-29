@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"testing"
 
+	"github.com/mikkeloscar/maze-repo/repo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,9 +19,11 @@ func TestAddRepoEntry(t *testing.T) {
 	assert.NoError(t, err, "should not fail")
 
 	r := &Repo{
-		name:    "test",
-		url:     "http://test.repo.com",
-		workdir: ".",
+		local: repo.Repo{
+			Name: "test",
+			Path: ".",
+		},
+		url: "http://test.repo.com",
 	}
 
 	err = addRepoEntry(src, r)
@@ -108,11 +112,11 @@ func TestSplitRepoDef(t *testing.T) {
 
 // Test cloning from git.
 func TestGitClone(t *testing.T) {
-	dst := "mockfiles/sway-git"
+	dst := path.Join(baseDir, "sway-git")
 
 	err := gitClone(fmt.Sprintf(aurCloneURL, "sway-git"), dst)
 	assert.NoError(t, err, "should not fail")
 
-	err = os.RemoveAll(dst)
+	err = os.RemoveAll(baseDir)
 	assert.NoError(t, err, "should not fail")
 }

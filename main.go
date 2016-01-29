@@ -8,6 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/drone/drone-plugin-go/plugin"
+	"github.com/mikkeloscar/maze-repo/repo"
 )
 
 type ArchBuild struct {
@@ -66,9 +67,11 @@ func run() error {
 	}
 
 	pkgRepo := &Repo{
-		name:    "repo",
-		url:     repoPath,
-		workdir: repoPath,
+		local: repo.Repo{
+			Name: "repo",
+			Path: repoPath,
+		},
+		url: repoPath,
 	}
 
 	builder := &Builder{

@@ -15,7 +15,7 @@ import (
 
 // add repo entry to the pacman.conf file specified by path.
 func addRepoEntry(path string, r *Repo) error {
-	entry := fmt.Sprintf("[%s]\nServer = %s\n", r.name, r.url)
+	entry := fmt.Sprintf("[%s]\nServer = %s\n", r.local.Name, r.url)
 
 	content, err := ioutil.ReadFile(path)
 	if err != nil {

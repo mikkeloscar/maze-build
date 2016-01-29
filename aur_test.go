@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var a = AUR{"mockfiles"}
+var a = AUR{baseDir}
 
 // Test getting deps from AUR.
 func TestGetDeps(t *testing.T) {
@@ -20,15 +20,16 @@ func TestGetDeps(t *testing.T) {
 	assert.True(t, ok, "should be true")
 	_, ok = deps["wlc-git"]
 	assert.True(t, ok, "should be true")
+
+	err = os.RemoveAll(baseDir)
+	assert.NoError(t, err, "should not fail")
 }
 
 // Test Getting sources from AUR.
 func TestAURGet(t *testing.T) {
-	pkgs, err := a.Get([]string{"sway-git"})
+	_, err := a.Get([]string{"sway-git"})
 	assert.NoError(t, err, "should not fail")
 
-	for _, pkg := range pkgs {
-		err = os.RemoveAll(pkg.Path)
-		assert.NoError(t, err, "should not fail")
-	}
+	err = os.RemoveAll(baseDir)
+	assert.NoError(t, err, "should not fail")
 }

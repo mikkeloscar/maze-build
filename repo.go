@@ -1,57 +1,50 @@
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/mikkeloscar/maze-repo/repo"
 )
 
 type Repo struct {
-	name     string
 	url      string
-	workdir  string
-	db       string
 	dbCached bool
+	local    repo.Repo
 }
 
-// Get path to db, downloads it first if needed.
-func (r *Repo) getDB() (string, error) {
+// Fetch db, downloads it first if needed.
+func (r *Repo) fetchDB() error {
 	if r.dbCached {
-		return path.Join(r.workdir, r.db), nil
+		return nil
 	}
 
-	fileName := fmt.Sprintf("%s.db.tar.gz", r.name)
+	fileName := fmt.Sprintf("%s.db.tar.gz", r.local.Name)
 
 	if strings.HasPrefix(r.url, "http://") {
 		// TODO: handle more db naming
 		_, err := r.httpDownload(fileName)
 		if err != nil {
-			return "", err
+			return err
 		}
 
-		r.db = fileName
 		r.dbCached = true
-		return r.getDB()
+		return nil
 	} else { // local repo
-		if r.url != r.workdir {
-			err := copyFile(path.Join(r.workdir, fileName), path.Join(r.url, fileName))
+		if r.url != r.local.Path {
+			err := copyFile(r.local.DB(), path.Join(r.url, fileName))
 			if err != nil {
-				return "", err
+				return err
 			}
 		}
 
-		r.db = fileName
 		r.dbCached = true
-		return r.getDB()
+		return nil
 	}
-
-	return "", fmt.Errorf("invalid url '%s'", r.url)
 }
 
 // copy file
@@ -78,7 +71,7 @@ func copyFile(dst, src string) error {
 
 // download db file over http.
 func (r *Repo) httpDownload(file string) (string, error) {
-	filePath := path.Join(r.workdir, file)
+	filePath := path.Join(r.local.Path, file)
 	out, err := os.Create(filePath)
 	if err != nil {
 		return "", err
@@ -105,9 +98,14 @@ func (r *Repo) httpDownload(file string) (string, error) {
 // packages that need to be build (because the source is newer than what's in
 // the repo).
 func (r *Repo) GetUpdated(pkgs []*SrcPkg) ([]*SrcPkg, error) {
+	err := r.fetchDB()
+	if err != nil {
+		return nil, err
+	}
+
 	updated := make([]*SrcPkg, 0, len(pkgs))
 	for _, pkg := range pkgs {
-		new, err := r.IsNew(pkg)
+		new, err := r.local.IsNew(pkg.PKGBUILD.Pkgbase, pkg.PKGBUILD.CompleteVersion())
 		if err != nil {
 			return nil, err
 		}
@@ -118,103 +116,4 @@ func (r *Repo) GetUpdated(pkgs []*SrcPkg) ([]*SrcPkg, error) {
 	}
 
 	return TopologicalSort(updated)
-}
-
-// AddLocal adds a list of packages to a repo db, moving the package files to
-// the repo db directory if needed.
-func (r *Repo) AddLocal(pkgPaths []string) error {
-	dbPath, err := r.getDB()
-	if err != nil {
-		return err
-	}
-
-	for i, pkg := range pkgPaths {
-		pkgPathDir, pkgPathBase := path.Split(pkg)
-
-		if r.workdir != pkgPathDir {
-			// move pkg to repo path.
-			newPath := path.Join(r.workdir, pkgPathBase)
-			err := os.Rename(pkg, newPath)
-			if err != nil {
-				return err
-			}
-			pkgPaths[i] = newPath
-		}
-	}
-
-	args := []string{"-R", dbPath}
-	args = append(args, pkgPaths...)
-
-	cmd := exec.Command("repo-add", args...)
-	cmd.Dir = r.workdir
-
-	return cmd.Run()
-}
-
-func (r *Repo) movePkgFile(db, pkgPath string) error {
-
-	return nil
-}
-
-// IsNew returns true if pkg is a newer version than what's in the repo.
-// If the package is not found in the repo, it will be marked as new.
-func (r *Repo) IsNew(pkg *SrcPkg) (bool, error) {
-	dbPath, err := r.getDB()
-	if err != nil {
-		return false, err
-	}
-
-	f, err := os.Open(dbPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return true, nil
-		}
-		return false, err
-	}
-	defer f.Close()
-
-	gzf, err := gzip.NewReader(f)
-	if err != nil {
-		return false, err
-	}
-
-	tarR := tar.NewReader(gzf)
-
-	for {
-		header, err := tarR.Next()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return false, err
-		}
-
-		switch header.Typeflag {
-		case tar.TypeDir:
-			n, v := splitNameVersion(header.Name)
-			for _, name := range pkg.PKGBUILD.Pkgnames {
-				if n == name {
-					version := pkg.PKGBUILD.CompleteVersion()
-					if version.Newer(v) {
-						return true, nil
-					}
-					return false, nil
-				}
-			}
-		case tar.TypeReg:
-			continue
-		}
-	}
-
-	return true, nil
-}
-
-// turn "zlib-1.2.8-4/" into ("zlib", "1.2.8-4").
-func splitNameVersion(str string) (string, string) {
-	chars := strings.Split(str[:len(str)-1], "-")
-	name := chars[:len(chars)-2]
-	version := chars[len(chars)-2:]
-
-	return strings.Join(name, "-"), strings.Join(version, "-")
 }

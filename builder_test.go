@@ -5,6 +5,7 @@ import (
 	"path"
 	"testing"
 
+	"github.com/mikkeloscar/maze-repo/repo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,9 +15,11 @@ const (
 
 var (
 	pkgRepo = &Repo{
-		name:    "repo",
-		url:     baseDir + "/repo",
-		workdir: baseDir + "/repo",
+		local: repo.Repo{
+			Name: "repo",
+			Path: baseDir + "/repo",
+		},
+		url: baseDir + "/repo",
 	}
 	builder = &Builder{
 		repo:    pkgRepo,
