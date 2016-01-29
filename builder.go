@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"path"
 	"strings"
@@ -75,7 +76,7 @@ func successLog(pkgs []*BuiltPkg) {
 // Update build environment.
 func (b *Builder) update() error {
 	log.Printf("Updating packages")
-	return runCmd(b.workdir, "sudo", "pacman", "--sync", "--refresh", "--sysupgrade", "--noconfirm")
+	return runCmd(b.workdir, nil, "sudo", "pacman", "--sync", "--refresh", "--sysupgrade", "--noconfirm")
 }
 
 // Get a sorted list of packages to build.
@@ -125,7 +126,7 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 		log.Printf("Checking for new version of %s", p.Pkgbase)
 	}
 
-	err := runCmd(pkg.Path, "makepkg", "--nobuild", "--nodeps", "--noconfirm")
+	err := runCmd(pkg.Path, nil, "makepkg", "--nobuild", "--nodeps", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +174,13 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 		log.Printf("Building package %s", p.Pkgbase)
 	}
 
-	err := runCmd(pkg.Path, "makepkg", "--install", "--syncdeps", "--noconfirm")
+	var env []string
+	if b.config.Packager != "" {
+		env = os.Environ()
+		env = append(env, fmt.Sprintf("PACKAGER=%s", b.config.Packager))
+	}
+
+	err := runCmd(pkg.Path, env, "makepkg", "--install", "--syncdeps", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}

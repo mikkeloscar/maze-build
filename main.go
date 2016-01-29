@@ -11,9 +11,9 @@ import (
 )
 
 type ArchBuild struct {
-	Repo    string   `json:"repo"`
-	AURPkgs []string `json:"aur_pkgs"`
-	SignKey string   `json:"sign_key"`
+	Repo     string `json:"repo"`
+	SignKey  string `json:"sign_key"`
+	Packager string `json:"packager"`
 }
 
 func main() {
@@ -59,6 +59,11 @@ func run() error {
 	// 	url:     repoUrl,
 	// 	workdir: repoPath,
 	// }
+
+	// configure build
+	if vargs.Packager == "" {
+		vargs.Packager = "drone-pkgbuild"
+	}
 
 	pkgRepo := &Repo{
 		name:    "repo",

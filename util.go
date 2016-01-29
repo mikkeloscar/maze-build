@@ -138,11 +138,12 @@ func parseBuildURLInfo(uri, srcPath string) (*Build, error) {
 }
 
 // run command from basedir and print output to stdout.
-func runCmd(baseDir, command string, args ...string) error {
+func runCmd(baseDir string, env []string, command string, args ...string) error {
 	cmd := exec.Command(command, args...)
 	if baseDir != "" {
 		cmd.Dir = baseDir
 	}
+	cmd.Env = env
 
 	// print command being run
 	fmt.Println("$", strings.Join(cmd.Args, " "))
@@ -181,7 +182,7 @@ func fmtOutput(output string) string {
 
 // Clone git repository from url to dst
 func gitClone(src, dst string) error {
-	err := runCmd("", "git", "clone", "-q", src, dst)
+	err := runCmd("", nil, "git", "clone", "-q", src, dst)
 	if err != nil {
 		return err
 	}
