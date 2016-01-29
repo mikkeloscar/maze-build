@@ -10,7 +10,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: mikkeloscar/drone-pkgbuild
+    repo: mikkeloscar/maze-drone
     tag: latest
     storage_driver: overlay
     when:
@@ -21,7 +21,7 @@ publish:
     username: $$DOCKER_USER
     password: $$DOCKER_PASS
     email: $$DOCKER_EMAIL
-    repo: mikkeloscar/drone-pkgbuild
+    repo: mikkeloscar/maze-drone
     tag: develop
     storage_driver: overlay
     when:
