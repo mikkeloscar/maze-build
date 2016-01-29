@@ -83,7 +83,7 @@ func (b *Builder) updatePkgSrcs(pkgs []*SrcPkg) error {
 
 // Check and update if a newer source exist for the package.
 func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
-	err := runCmd(pkg.Path, "makepkg", "-od", "--noconfirm")
+	err := runCmd(pkg.Path, "makepkg", "--nobuild", "--nodeps", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (b *Builder) buildPkgs(pkgs []*SrcPkg) ([]string, error) {
 
 // Build package and return a list of resulting package archives.
 func (b *Builder) buildPkg(pkg *SrcPkg) ([]string, error) {
-	err := runCmd(pkg.Path, "makepkg", "-is", "--noconfirm")
+	err := runCmd(pkg.Path, "makepkg", "--install", "--syncdeps", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}
