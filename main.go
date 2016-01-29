@@ -85,7 +85,7 @@ func run() error {
 	// }
 
 	build := &Build{
-		Pkgs: []string{"sway-git"},
+		Pkgs: []string{"linux-ck"},
 		Src:  &AUR{srcsPath},
 	}
 
