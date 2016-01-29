@@ -1,6 +1,6 @@
 .PHONY: clean deps docker build
 
-EXECUTABLE ?= drone-pkgbuild
+EXECUTABLE ?= maze-drone
 IMAGE ?= mikkeloscar/$(EXECUTABLE)
 
 all: build

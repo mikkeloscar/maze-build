@@ -63,7 +63,7 @@ func run() error {
 
 	// configure build
 	if vargs.Packager == "" {
-		vargs.Packager = "drone-pkgbuild"
+		vargs.Packager = "maze-drone"
 	}
 
 	pkgRepo := &Repo{

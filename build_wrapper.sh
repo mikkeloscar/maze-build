@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Simple wrapper around drone-pkgbuild to setup build directories and drop
+# Simple wrapper around maze-drone to setup build directories and drop
 # permissions to the build user.
 
 build_vars=$2
@@ -13,4 +13,4 @@ mkdir -p $path/drone_pkgbuild/{repo,sources}
 chown $UGID:$UGID -R $path/drone_pkgbuild
 
 # Run real program as user $UGNAME
-echo $build_vars | sudo -u $UGNAME /usr/bin/drone-pkgbuild
+echo $build_vars | sudo -u $UGNAME /usr/bin/maze-drone
