@@ -20,10 +20,10 @@ type BuiltPkg struct {
 
 func (b *BuiltPkg) String() string {
 	if b.Signature != "" {
-		return fmt.Sprintf("%s (%s)", b.Pkg, b.Signature)
+		return fmt.Sprintf("%s (%s)", path.Base(b.Pkg), path.Base(b.Signature))
 	}
 
-	return b.Pkg
+	return path.Base(b.Pkg)
 }
 
 type Builder struct {
