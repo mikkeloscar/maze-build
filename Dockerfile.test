@@ -1,9 +1,9 @@
 # Build Archlinux packages with drone
 #
-#     docker build --rm=true -t mikkeloscar/maze-drone-test \
+#     docker build --rm=true -t mikkeloscar/maze-build-test \
 #       -f Dockerfile.test .
 
-FROM mikkeloscar/maze-drone:latest
+FROM mikkeloscar/maze-build:latest
 MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
 
 # parent image switches to build user, switch back to root
@@ -22,7 +22,7 @@ COPY contrib/etc/sudoers.test /etc/sudoers
 RUN chmod 'u=r,g=r,o=' /etc/sudoers
 
 # copy local src files to container workspace.
-ADD . /go/src/github.com/mikkeloscar/maze-drone/
+ADD . /go/src/github.com/mikkeloscar/maze-build/
 RUN chown "$UGNAME:$UGNAME" /go -R
 
 # switch to non-root user
@@ -35,9 +35,9 @@ ENV GOPATH /go
 ENV DOCKER_TEST 1
 
 # get go deps
-RUN go get -t github.com/mikkeloscar/maze-drone/...
+RUN go get -t github.com/mikkeloscar/maze-build/...
 
 # set workdir
-WORKDIR /go/src/github.com/mikkeloscar/maze-drone
+WORKDIR /go/src/github.com/mikkeloscar/maze-build
 
 ENTRYPOINT ["go", "test"]

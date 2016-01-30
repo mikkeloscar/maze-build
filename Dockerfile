@@ -1,6 +1,6 @@
 # Build Archlinux packages with drone
 #
-#     docker build --rm=true -t mikkeloscar/maze-drone .
+#     docker build --rm=true -t mikkeloscar/maze-build .
 
 FROM nfnty/arch-devel:latest
 MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
@@ -39,6 +39,6 @@ RUN \
 COPY build_wrapper.sh /usr/bin/build
 
 # Add binary
-COPY maze-drone /usr/bin
+COPY maze-build /usr/bin
 
 ENTRYPOINT ["/usr/bin/build"]
