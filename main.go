@@ -89,7 +89,7 @@ func run() error {
 	// }
 
 	build := &build{
-		Pkgs: []string{"linux-ck"},
+		Pkgs: []string{"chromium-dev"},
 		Src:  &AUR{srcsPath},
 	}
 
