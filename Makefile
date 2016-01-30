@@ -14,7 +14,7 @@ deps:
 docker: build
 	docker build --rm -t $(IMAGE) .
 
-docker-test: docker
+docker-test:
 	docker build --rm -t $(IMAGE)-test -f Dockerfile.test .
 	docker run --rm $(IMAGE)-test
 

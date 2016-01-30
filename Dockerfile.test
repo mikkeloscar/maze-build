@@ -3,23 +3,44 @@
 #     docker build --rm=true -t mikkeloscar/maze-build-test \
 #       -f Dockerfile.test .
 
-FROM mikkeloscar/maze-build:latest
+FROM nfnty/arch-devel:latest
 MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
 
-# parent image switches to build user, switch back to root
-USER root
-
-# Install go
+# Setup build user/group
+ENV UGID='1000' UGNAME='builder'
 RUN \
-    pacman -Syu go --noconfirm && \
+    groupadd --gid "$UGID" "$UGNAME" && \
+    useradd --create-home --uid "$UGID" --gid "$UGID" --shell /usr/bin/false "${UGNAME}"
+
+RUN \
+    # Update and install pkgbuild-introspection and go
+    pacman -Syu pkgbuild-introspection go --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
     # Clean pkg cache
     find /var/cache/pacman/pkg -mindepth 1 -delete
 
-# Add sudoers.test
+# copy sudoers file
 COPY contrib/etc/sudoers.test /etc/sudoers
-RUN chmod 'u=r,g=r,o=' /etc/sudoers
+# Add default mirror
+COPY contrib/etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
+# Add pacman.conf template
+COPY contrib/etc/pacman.conf.template /etc/pacman.conf.template
+# Add gnupg config
+ADD contrib/.gnupg /home/$UGNAME/.gnupg
+
+RUN \
+    chmod 'u=r,g=r,o=' /etc/sudoers && \
+    chmod 'u=rwX,g=rX,o=rX' /etc/pacman.d/mirrorlist && \
+    chmod 'u=rwX,g=rX,o=rX' /etc/pacman.conf.template && \
+    chown "$UGNAME:$UGNAME" /etc/pacman.conf.template && \
+    chown "$UGNAME:$UGNAME" -R /home/$UGNAME/.gnupg
+
+# set $GOPATH
+ENV GOPATH /go
+
+# set $DOCKER_TEST for tests run inside docker
+ENV DOCKER_TEST 1
 
 # copy local src files to container workspace.
 ADD . /go/src/github.com/mikkeloscar/maze-build/
@@ -28,12 +49,6 @@ RUN chown "$UGNAME:$UGNAME" /go -R
 # switch to non-root user
 USER $UGNAME
 
-# set $GOPATH
-ENV GOPATH /go
-
-# set $DOCKER_TEST for tests run inside docker
-ENV DOCKER_TEST 1
-
 # get go deps
 RUN go get -t github.com/mikkeloscar/maze-build/...
 
@@ -41,3 +56,5 @@ RUN go get -t github.com/mikkeloscar/maze-build/...
 WORKDIR /go/src/github.com/mikkeloscar/maze-build
 
 ENTRYPOINT ["go", "test"]
+
+# vim: ft=dockerfile:

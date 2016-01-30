@@ -16,6 +16,8 @@ type ArchBuild struct {
 	Repo     string `json:"repo"`
 	SignKey  string `json:"sign_key"`
 	Packager string `json:"packager"`
+	// temp
+	// Packages []string `json:"packages"`
 }
 
 func main() {
@@ -88,12 +90,17 @@ func run() error {
 	// 	return err
 	// }
 
-	build := &build{
-		Pkgs: []string{"chromium-dev"},
-		Src:  &AUR{srcsPath},
+	buildInst, err := parseGitLog(workspace.Path, srcsPath)
+	if err != nil {
+		return err
 	}
 
-	pkgs, err := builder.BuildNew(build.Pkgs, build.Src)
+	// buildInst := &BuildInst{
+	// 	Pkgs: vargs.Packages,
+	// 	Src:  &AUR{srcsPath},
+	// }
+
+	pkgs, err := builder.BuildNew(buildInst.Pkgs, buildInst.Src)
 	if err != nil {
 		return err
 	}

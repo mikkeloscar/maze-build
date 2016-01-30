@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -103,39 +103,40 @@ func splitRepoDef(repo string) (string, string, error) {
 	return split[0], split[1], nil
 }
 
-type build struct {
+// BuildInst defines a build instruction with package name and sourcer.
+type BuildInst struct {
 	Pkgs []string
 	Src  *AUR
 }
 
-func parseBuildURLInfo(uri, srcPath string) (*build, error) {
-	u, err := url.Parse(uri)
-	if err != nil {
-		return nil, err
-	}
+// func parseBuildURLInfo(uri, srcPath string) (*build, error) {
+// 	u, err := url.Parse(uri)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	m, err := url.ParseQuery(u.RawQuery)
-	if err != nil {
-		return nil, err
-	}
+// 	m, err := url.ParseQuery(u.RawQuery)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	build := &build{}
+// 	build := &build{}
 
-	if v, ok := m["pkgs"]; ok {
-		build.Pkgs = v
-	}
+// 	if v, ok := m["pkgs"]; ok {
+// 		build.Pkgs = v
+// 	}
 
-	if v, ok := m["src"]; ok {
-		switch v[0] {
-		case "aur":
-			fallthrough
-		default:
-			build.Src = &AUR{srcPath}
-		}
-	}
+// 	if v, ok := m["src"]; ok {
+// 		switch v[0] {
+// 		case "aur":
+// 			fallthrough
+// 		default:
+// 			build.Src = &AUR{srcPath}
+// 		}
+// 	}
 
-	return build, nil
-}
+// 	return build, nil
+// }
 
 // run command from basedir and print output to stdout.
 func runCmd(baseDir string, env []string, command string, args ...string) error {
@@ -188,4 +189,35 @@ func gitClone(src, dst string) error {
 	}
 
 	return nil
+}
+
+// parse build instructions from the git log.
+func parseGitLog(dir, srcPath string) (*BuildInst, error) {
+	cmd := exec.Command("git", "log", "-1", `--pretty=%B`)
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(out)
+		return nil, err
+	}
+
+	out = bytes.Trim(out, "\n")
+
+	values := strings.Split(string(out), ":")
+	if len(values) != 2 {
+		return nil, fmt.Errorf("failed to parse log: %s", out)
+	}
+
+	buildInst := &BuildInst{
+		Pkgs: []string{values[0]},
+	}
+
+	switch values[1] {
+	case "aur":
+		fallthrough
+	default:
+		buildInst.Src = &AUR{srcPath}
+	}
+
+	return buildInst, nil
 }

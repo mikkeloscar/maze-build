@@ -35,6 +35,10 @@ RUN \
     chown "$UGNAME:$UGNAME" /etc/pacman.conf.template && \
     chown "$UGNAME:$UGNAME" -R /home/$UGNAME/.gnupg
 
+# set git environment
+ENV GIT_AUTHOR_EMAIL=maze-build GIT_AUTHOR_NAME=maze-build \
+    GIT_COMMITTER_EMAIL=maze-build GIT_COMMITTER_NAME=maze-build
+
 # Add wrapper script
 COPY build_wrapper.sh /usr/bin/build
 
