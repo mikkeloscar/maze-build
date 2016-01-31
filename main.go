@@ -105,7 +105,10 @@ func run() error {
 		return err
 	}
 
-	fmt.Println(pkgs)
+	err = storeBuiltPkgs(path.Join(workspace.Path, "packages.built"), pkgs)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

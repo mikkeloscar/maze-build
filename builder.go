@@ -15,16 +15,16 @@ import (
 
 // BuiltPkg defines a built package and optional signature file.
 type BuiltPkg struct {
-	Pkg       string
+	Package   string
 	Signature string
 }
 
 func (b *BuiltPkg) String() string {
 	if b.Signature != "" {
-		return fmt.Sprintf("%s (%s)", path.Base(b.Pkg), path.Base(b.Signature))
+		return fmt.Sprintf("%s (%s)", path.Base(b.Package), path.Base(b.Signature))
 	}
 
-	return path.Base(b.Pkg)
+	return path.Base(b.Package)
 }
 
 // Builder is used to build arch packages.
@@ -197,7 +197,7 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), "pkg.tar.xz") {
 			builtPkg := &BuiltPkg{
-				Pkg: path.Join(pkg.Path, f.Name()),
+				Package: path.Join(pkg.Path, f.Name()),
 			}
 			pkgs = append(pkgs, builtPkg)
 		}
@@ -206,7 +206,7 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), "pkg.tar.xz.sig") {
 			for _, p := range pkgs {
-				if path.Base(p.Pkg) == f.Name()[:len(f.Name())-4] {
+				if path.Base(p.Package) == f.Name()[:len(f.Name())-4] {
 					p.Signature = path.Join(pkg.Path, f.Name())
 				}
 			}

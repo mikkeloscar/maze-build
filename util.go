@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -220,4 +221,15 @@ func parseGitLog(dir, srcPath string) (*BuildInst, error) {
 	}
 
 	return buildInst, nil
+}
+
+func storeBuiltPkgs(file string, pkgs []*BuiltPkg) error {
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	return enc.Encode(pkgs)
 }
