@@ -223,6 +223,7 @@ func parseGitLog(dir, srcPath string) (*BuildInst, error) {
 	return buildInst, nil
 }
 
+// Store a list of packages built.
 func storeBuiltPkgs(file string, pkgs []*BuiltPkg) error {
 	f, err := os.Create(file)
 	if err != nil {

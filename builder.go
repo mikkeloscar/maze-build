@@ -15,8 +15,8 @@ import (
 
 // BuiltPkg defines a built package and optional signature file.
 type BuiltPkg struct {
-	Package   string
-	Signature string
+	Package   string `json:"package"`
+	Signature string `json:"signature"`
 }
 
 func (b *BuiltPkg) String() string {
