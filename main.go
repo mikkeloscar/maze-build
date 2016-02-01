@@ -105,7 +105,7 @@ func run() error {
 		return err
 	}
 
-	err = storeBuiltPkgs(path.Join(workspace.Path, "packages.built"), pkgs)
+	err = storeBuiltPkgs(path.Join(workspace.Path, "drone_pkgbuild", "packages.built"), pkgs)
 	if err != nil {
 		return err
 	}
