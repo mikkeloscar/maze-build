@@ -4,24 +4,17 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mikkeloscar/maze-repo/repo"
+	"github.com/mikkeloscar/maze/model"
+	"github.com/mikkeloscar/maze/repo"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	repo1 = Repo{
-		local: repo.Repo{
-			Name: "repo1",
-			Path: baseDir,
-		},
-		url: baseDir,
+	repo1 = &Repo{
+		local: *repo.NewRepo(&model.Repo{Name: "repo1"}, baseDir+"/repo"),
 	}
-	repo2 = Repo{
-		local: repo.Repo{
-			Name: "repo2",
-			Path: baseDir,
-		},
-		url: baseDir,
+	repo2 = &Repo{
+		local: *repo.NewRepo(&model.Repo{Name: "repo2"}, baseDir+"/repo"),
 	}
 )
 
@@ -29,7 +22,7 @@ var (
 func TestGetUpdated(t *testing.T) {
 	aurSrc = &AUR{baseDir + "/sources"}
 
-	_, _, err := setupBuildDirs(baseDir)
+	_, _, err := setupBuildDirs(baseDir, repo1, repo2)
 	assert.NoError(t, err, "should not fail")
 
 	pkgs, err := aurSrc.Get([]string{"wlc-git"})

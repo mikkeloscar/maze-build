@@ -5,7 +5,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/mikkeloscar/maze-repo/repo"
+	"github.com/mikkeloscar/maze/model"
+	"github.com/mikkeloscar/maze/repo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,11 +16,7 @@ const (
 
 var (
 	pkgRepo = &Repo{
-		local: repo.Repo{
-			Name: "repo",
-			Path: baseDir + "/repo",
-		},
-		url: baseDir + "/repo",
+		local: *repo.NewRepo(&model.Repo{Name: "repo"}, baseDir),
 	}
 	builder = &Builder{
 		repo:    pkgRepo,
@@ -28,8 +25,20 @@ var (
 	aurSrc = &AUR{baseDir + "/sources"}
 )
 
+func setupRepoDirs(repos []*Repo) error {
+	for _, repo := range repos {
+		err := repo.local.InitDir()
+		if err != nil {
+			return err
+		}
+		repo.url = repo.local.Path()
+	}
+
+	return nil
+}
+
 // create buildirs and return full path to repo base dir and sources base dir.
-func setupBuildDirs(base string) (string, string, error) {
+func setupBuildDirs(base string, repos ...*Repo) (string, string, error) {
 	repo := path.Join(base, "repo")
 	err := os.MkdirAll(repo, 0755)
 	if err != nil {
@@ -42,6 +51,11 @@ func setupBuildDirs(base string) (string, string, error) {
 		return "", "", err
 	}
 
+	err = setupRepoDirs(repos)
+	if err != nil {
+		return "", "", err
+	}
+
 	return sources, repo, nil
 }
 
@@ -50,7 +64,7 @@ func TestUpdateBuild(t *testing.T) {
 		return
 	}
 
-	_, _, err := setupBuildDirs(baseDir)
+	_, _, err := setupBuildDirs(baseDir, pkgRepo)
 	assert.NoError(t, err, "should not fail")
 
 	err = builder.update()
@@ -69,7 +83,7 @@ func TestupdatePkgSrc(t *testing.T) {
 	pkgs, err := aurSrc.Get([]string{"wlc-git"})
 	assert.NoError(t, err, "should not fail")
 
-	_, _, err = setupBuildDirs(baseDir)
+	_, _, err = setupBuildDirs(baseDir, pkgRepo)
 	assert.NoError(t, err, "should not fail")
 
 	_, err = builder.updatePkgSrc(pkgs[0])
@@ -88,7 +102,7 @@ func TestBuildPkg(t *testing.T) {
 	pkgs, err := aurSrc.Get([]string{"imgur"})
 	assert.NoError(t, err, "should not fail")
 
-	_, _, err = setupBuildDirs(baseDir)
+	_, _, err = setupBuildDirs(baseDir, pkgRepo)
 	assert.NoError(t, err, "should not fail")
 
 	_, err = builder.buildPkg(pkgs[0])
@@ -104,7 +118,7 @@ func TestBuildPkgs(t *testing.T) {
 		return
 	}
 
-	_, _, err := setupBuildDirs(baseDir)
+	_, _, err := setupBuildDirs(baseDir, pkgRepo)
 	assert.NoError(t, err, "should not fail")
 
 	_, err = builder.BuildNew([]string{"imgur"}, aurSrc)

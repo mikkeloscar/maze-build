@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/mikkeloscar/maze-repo/repo"
+	"github.com/mikkeloscar/maze/repo"
 )
 
 // Repo defines a local copy of a remote arch repository.
@@ -38,7 +38,7 @@ func (r *Repo) fetchDB() error {
 	}
 
 	// else local repo
-	if r.url != r.local.Path {
+	if r.url != r.local.Path() {
 		err := copyFile(r.local.DB(), path.Join(r.url, fileName))
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func copyFile(dst, src string) error {
 
 // download db file over http.
 func (r *Repo) httpDownload(file string) (string, error) {
-	filePath := path.Join(r.local.Path, file)
+	filePath := path.Join(r.local.Path(), file)
 	out, err := os.Create(filePath)
 	if err != nil {
 		return "", err

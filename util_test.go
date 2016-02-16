@@ -7,7 +7,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/mikkeloscar/maze-repo/repo"
+	"github.com/mikkeloscar/maze/model"
+	"github.com/mikkeloscar/maze/repo"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,11 +20,8 @@ func TestAddRepoEntry(t *testing.T) {
 	assert.NoError(t, err, "should not fail")
 
 	r := &Repo{
-		local: repo.Repo{
-			Name: "test",
-			Path: ".",
-		},
-		url: "http://test.repo.com",
+		local: *repo.NewRepo(&model.Repo{Name: "test"}, "."),
+		url:   "http://test.repo.com",
 	}
 
 	err = addRepoEntry(src, r)
@@ -129,7 +127,7 @@ func TestParseGitLog(t *testing.T) {
 	env = append(env, "GIT_AUTHOR_EMAIL=test")
 	env = append(env, "GIT_AUTHOR_NAME=test")
 	// create new empty commit
-	cmd := exec.Command("git", "commit", "--allow-empty", "-m", "sway-git:aur")
+	cmd := exec.Command("git", "commit", "--allow-empty", "-m", "update:sway-git:aur")
 	cmd.Env = env
 	err := cmd.Run()
 	assert.NoError(t, err, "should not fail")

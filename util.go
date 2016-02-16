@@ -205,12 +205,12 @@ func parseGitLog(dir, srcPath string) (*BuildInst, error) {
 	out = bytes.Trim(out, "\n")
 
 	values := strings.Split(string(out), ":")
-	if len(values) != 2 {
+	if len(values) != 3 {
 		return nil, fmt.Errorf("failed to parse log: %s", out)
 	}
 
 	buildInst := &BuildInst{
-		Pkgs: []string{values[0]},
+		Pkgs: []string{values[1]},
 	}
 
 	switch values[1] {
