@@ -143,3 +143,16 @@ func TestParseGitLog(t *testing.T) {
 	cmd.Env = env
 	assert.NoError(t, err, "should not fail")
 }
+
+func TestParseRepo(t *testing.T) {
+	r, err := parseRepo("name=http://example.com/repo/path", "")
+	assert.NoError(t, err, "should not fail")
+	assert.NotNil(t, r, "should no be nil")
+
+	r, err = parseRepo("http://example.com/owner/name", "")
+	assert.NoError(t, err, "should not fail")
+	assert.NotNil(t, r, "should no be nil")
+
+	_, err = parseRepo("http://example.com/owner", "")
+	assert.Error(t, err, "should fail")
+}

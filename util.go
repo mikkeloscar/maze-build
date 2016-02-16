@@ -8,10 +8,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/kr/pty"
+	"github.com/mikkeloscar/maze/model"
+	"github.com/mikkeloscar/maze/repo"
 )
 
 // add repo entry to the pacman.conf file specified by path.
@@ -233,4 +236,32 @@ func storeBuiltPkgs(file string, pkgs []*BuiltPkg) error {
 
 	enc := json.NewEncoder(f)
 	return enc.Encode(pkgs)
+}
+
+var repoPattReg = regexp.MustCompile(`([a-z\d][a-z\d@._+-]*)=http(s)?://.+`)
+var repoPatt = regexp.MustCompile(`http(s)?://.+/([a-z\d][a-z\d@._+-]*)/([a-z\d][a-z\d@._+-]*)`)
+
+func parseRepo(uri, basePath string) (*Repo, error) {
+	matches := repoPattReg.FindStringSubmatch(uri)
+	if len(matches) > 0 {
+		return &Repo{
+			local: *repo.NewRepo(&model.Repo{
+				Name: matches[1],
+			}, basePath),
+			url: uri,
+		}, nil
+	}
+
+	matches = repoPatt.FindStringSubmatch(uri)
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("invalid repo uri: %s", uri)
+	}
+
+	return &Repo{
+		local: *repo.NewRepo(&model.Repo{
+			Owner: matches[2],
+			Name:  matches[3],
+		}, basePath),
+		url: uri,
+	}, nil
 }

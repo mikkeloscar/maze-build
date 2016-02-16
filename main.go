@@ -8,8 +8,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/drone/drone-plugin-go/plugin"
-	"github.com/mikkeloscar/maze/model"
-	"github.com/mikkeloscar/maze/repo"
 )
 
 // ArchBuild defines the vargs passed from .drone.yml.
@@ -70,14 +68,15 @@ func run() error {
 		vargs.Packager = "maze-build"
 	}
 
-	pkgRepo := &Repo{
-		local: *repo.NewRepo(&model.Repo{Name: "repo"}, repoPath),
-	}
-	err := pkgRepo.local.InitDir()
+	pkgRepo, err := parseRepo(vargs.Repo, repoPath)
 	if err != nil {
 		return err
 	}
-	pkgRepo.url = pkgRepo.local.Path()
+
+	err = pkgRepo.local.InitDir()
+	if err != nil {
+		return err
+	}
 
 	builder := &Builder{
 		workdir: srcsPath,
