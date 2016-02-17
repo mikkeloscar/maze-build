@@ -19,7 +19,15 @@ import (
 
 // add repo entry to the pacman.conf file specified by path.
 func addRepoEntry(path string, r *Repo) error {
-	entry := fmt.Sprintf("[%s]\nServer = %s\n", r.local.Name, r.url)
+	arch := "/$arch"
+	if r.url[len(r.url)-1] == '/' {
+		arch = arch[1:]
+	}
+
+	// TODO: better handling of SigLevel
+	entry := fmt.Sprintf("[%s]\nSigLevel = PackageOptional\nServer = %s%s\n",
+		r.local.Name,
+		r.url, arch)
 
 	content, err := ioutil.ReadFile(path)
 	if err != nil {

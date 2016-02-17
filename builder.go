@@ -37,8 +37,14 @@ type Builder struct {
 // BuildNew checks what packages to build based on related repo and builds
 // those that have been updated.
 func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]*BuiltPkg, error) {
+	// initialize pacman.conf with upstream repo
+	err := b.setup()
+	if err != nil {
+		return nil, err
+	}
+
 	// make sure environment is up to date
-	err := b.update()
+	err = b.update()
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +79,16 @@ func successLog(pkgs []*BuiltPkg) {
 	}
 
 	log.Print(buf.String())
+}
+
+// setup build environment.
+func (b *Builder) setup() error {
+	err := addRepoEntry("/etc/pacman.conf.template", b.repo)
+	if err != nil {
+		return err
+	}
+
+	return addPacmanConf("/etc/pacman.conf.template")
 }
 
 // Update build environment.
