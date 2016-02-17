@@ -135,6 +135,7 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 
 	cmd := exec.Command("mksrcinfo")
 	cmd.Dir = pkg.Path
+	err = cmd.Run()
 	if err != nil {
 		return nil, err
 	}
