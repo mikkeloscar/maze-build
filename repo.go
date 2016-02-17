@@ -37,9 +37,11 @@ func (r *Repo) fetchDB() error {
 		return nil
 	}
 
+	arch := "x86_64"
+
 	// else local repo
-	if r.url != r.local.Path() {
-		err := copyFile(r.local.DB(), path.Join(r.url, fileName))
+	if r.url != r.local.PathDeep(arch) {
+		err := copyFile(r.local.DB(arch), path.Join(r.url, fileName))
 		if err != nil {
 			return err
 		}
@@ -73,7 +75,7 @@ func copyFile(dst, src string) error {
 
 // download db file over http.
 func (r *Repo) httpDownload(file string) (string, error) {
-	filePath := path.Join(r.local.Path(), file)
+	filePath := path.Join(r.local.PathDeep("x86_64"), file)
 	out, err := os.Create(filePath)
 	if err != nil {
 		return "", err
@@ -81,7 +83,7 @@ func (r *Repo) httpDownload(file string) (string, error) {
 	defer out.Close()
 
 	// Get data
-	resp, err := http.Get(fmt.Sprintf("%s/%s", r.url, file))
+	resp, err := http.Get(fmt.Sprintf("%s/%s/%s", r.url, "x86_64", file))
 	if err != nil {
 		return "", err
 	}
@@ -107,7 +109,7 @@ func (r *Repo) GetUpdated(pkgs []*SrcPkg) ([]*SrcPkg, error) {
 
 	updated := make([]*SrcPkg, 0, len(pkgs))
 	for _, pkg := range pkgs {
-		new, err := r.local.IsNew(pkg.PKGBUILD.Pkgbase, pkg.PKGBUILD.CompleteVersion())
+		new, err := r.local.IsNew(pkg.PKGBUILD.Pkgbase, "any", pkg.PKGBUILD.CompleteVersion())
 		if err != nil {
 			return nil, err
 		}

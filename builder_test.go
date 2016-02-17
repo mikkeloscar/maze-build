@@ -31,7 +31,7 @@ func setupRepoDirs(repos []*Repo) error {
 		if err != nil {
 			return err
 		}
-		repo.url = repo.local.Path()
+		repo.url = repo.local.PathDeep("x86_64")
 	}
 
 	return nil
