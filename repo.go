@@ -26,7 +26,7 @@ func (r *Repo) fetchDB() error {
 
 	fileName := fmt.Sprintf("%s.db.tar.gz", r.local.Name)
 
-	if strings.HasPrefix(r.url, "http://") {
+	if strings.HasPrefix(r.url, "http://") || strings.HasPrefix(r.url, "https://") {
 		// TODO: handle more db naming
 		_, err := r.httpDownload(fileName)
 		if err != nil {
@@ -81,7 +81,7 @@ func (r *Repo) httpDownload(file string) (string, error) {
 	defer out.Close()
 
 	// Get data
-	resp, err := http.Get(r.url)
+	resp, err := http.Get(fmt.Sprintf("%s/%s", r.url, file))
 	if err != nil {
 		return "", err
 	}
