@@ -66,13 +66,34 @@ func (a AUR) getDeps(pkgs []string, updates map[string]struct{}) error {
 	}
 
 	for _, pkg := range pkgsInfo {
-		updates[pkg.Name] = struct{}{}
+		updates[pkg.PackageBase] = struct{}{}
 
 		// TODO: maybe add optdepends
 		depends := make([]string, 0, len(pkg.Depends)+len(pkg.MakeDepends))
-		depends = append(depends, pkg.Depends...)
-		depends = append(depends, pkg.MakeDepends...)
+		err := addDeps(&depends, pkg.Depends)
+		if err != nil {
+			return err
+		}
+		err = addDeps(&depends, pkg.MakeDepends)
+		if err != nil {
+			return err
+		}
 		a.getDeps(depends, updates)
+	}
+
+	return nil
+}
+
+// parses a string slice of dependencies and adds them to the combinedDepends
+// slice.
+func addDeps(combinedDepends *[]string, deps []string) error {
+	parsedDeps, err := pkgbuild.ParseDeps(deps)
+	if err != nil {
+		return err
+	}
+
+	for _, dep := range parsedDeps {
+		*combinedDepends = append(*combinedDepends, dep.Name)
 	}
 
 	return nil
