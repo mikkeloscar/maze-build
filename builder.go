@@ -97,9 +97,20 @@ func (b *Builder) update() error {
 	return runCmd(b.workdir, nil, "sudo", "pacman", "--sync", "--refresh", "--sysupgrade", "--noconfirm")
 }
 
+func getBuildPkgsLog(msg string, pkgs []string) {
+	var buf bytes.Buffer
+	buf.WriteString(msg)
+	for _, pkg := range pkgs {
+		buf.WriteString("\n * ")
+		buf.WriteString(pkg)
+	}
+
+	log.Print(buf.String())
+}
+
 // Get a sorted list of packages to build.
 func (b *Builder) getBuildPkgs(pkgs []string, aur *AUR) ([]*SrcPkg, error) {
-	log.Printf("Fetching build sources+dependencies for %s", strings.Join(pkgs, ", "))
+	getBuildPkgsLog("Fetching build sources+dependencies for packages:", pkgs)
 	pkgSrcs, err := aur.Get(pkgs)
 	if err != nil {
 		return nil, err

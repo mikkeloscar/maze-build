@@ -221,7 +221,7 @@ func parseGitLog(dir, srcPath string) (*BuildInst, error) {
 	}
 
 	buildInst := &BuildInst{
-		Pkgs: []string{values[1]},
+		Pkgs: strings.Split(values[1], ","),
 	}
 
 	switch values[1] {
