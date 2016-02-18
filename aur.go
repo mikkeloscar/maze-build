@@ -60,7 +60,7 @@ func (a *AUR) Get(pkgs []string) ([]*SrcPkg, error) {
 
 // query the AUR for build deps to packages.
 func (a AUR) getDeps(pkgs []string, updates map[string]struct{}) error {
-	pkgsInfo, err := aur.Multiinfo(pkgs)
+	pkgsInfo, err := aur.Info(pkgs)
 	if err != nil {
 		return err
 	}
