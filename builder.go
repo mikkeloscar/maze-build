@@ -155,7 +155,7 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 		log.Printf("Checking for new version of %s", p.Pkgbase)
 	}
 
-	err := runCmd(pkg.Path, nil, "makepkg", "--nobuild", "--nodeps", "--noconfirm")
+	err := runCmd(pkg.Path, nil, "makepkg", "--nobuild", "--nodeps", "--noprepare", "--noconfirm")
 	if err != nil {
 		return nil, err
 	}
