@@ -3,7 +3,7 @@
 #     docker build --rm=true -t mikkeloscar/maze-build .
 
 FROM nfnty/arch-devel:latest
-MAINTAINER Mikkel Oscar Lyderik <mikkeloscar@gmail.com>
+MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
 
 # Setup build user/group
 ENV UGID='1000' UGNAME='builder'
@@ -12,8 +12,8 @@ RUN \
     useradd --create-home --uid "$UGID" --gid "$UGID" --shell /usr/bin/false "${UGNAME}"
 
 RUN \
-    # Update and install pkgbuild-introspection and jq
-    pacman -Syu pkgbuild-introspection jq --noconfirm && \
+    # Update and install pkgbuild-introspection
+    pacman -Syu pkgbuild-introspection --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
     # Clean pkg cache

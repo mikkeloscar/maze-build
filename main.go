@@ -7,12 +7,10 @@ import (
 	"path"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/drone/drone-plugin-go/plugin"
 )
 
-// ArchBuild defines the vargs passed from .drone.yml.
+// ArchBuild defines the config options passed from .drone.yml.
 type ArchBuild struct {
-	Repo     string `json:"repo"`
 	SignKey  string `json:"sign_key"`
 	Packager string `json:"packager"`
 	// temp
@@ -39,21 +37,12 @@ func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
 }
 
 func run() error {
-	// var repo = plugin.Repo{}
-	// var build = plugin.Build{}
-	var system = plugin.System{}
-	var workspace = plugin.Workspace{}
-	var vargs = ArchBuild{}
+	vargs := ArchBuild{}
+	repo := os.Getenv("PLUGIN_REPO")
+	workspace := os.Getenv("DRONE_WORKSPACE")
 
-	// plugin.Param("repo", &repo)
-	// plugin.Param("build", &build)
-	plugin.Param("system", &system)
-	plugin.Param("workspace", &workspace)
-	plugin.Param("vargs", &vargs)
-	plugin.MustParse()
-
-	srcsPath := path.Join(workspace.Path, "drone_pkgbuild", "sources")
-	repoPath := path.Join(workspace.Path, "drone_pkgbuild", "repo")
+	srcsPath := path.Join(workspace, "drone_pkgbuild", "sources")
+	repoPath := path.Join(workspace, "drone_pkgbuild", "repo")
 
 	// repoName, repoUrl, err := splitRepoDef(vargs.Repo)
 
@@ -68,7 +57,7 @@ func run() error {
 		vargs.Packager = "maze-build"
 	}
 
-	pkgRepo, err := parseRepo(vargs.Repo, repoPath)
+	pkgRepo, err := parseRepo(repo, repoPath)
 	if err != nil {
 		return err
 	}
@@ -91,7 +80,7 @@ func run() error {
 	// 	return err
 	// }
 
-	buildInst, err := parseGitLog(workspace.Path, srcsPath)
+	buildInst, err := parseGitLog(workspace, srcsPath)
 	if err != nil {
 		return err
 	}
@@ -106,7 +95,7 @@ func run() error {
 		return err
 	}
 
-	err = storeBuiltPkgs(path.Join(workspace.Path, "drone_pkgbuild", "packages.built"), pkgs)
+	err = storeBuiltPkgs(path.Join(workspace, "drone_pkgbuild", "packages.built"), pkgs)
 	if err != nil {
 		return err
 	}
