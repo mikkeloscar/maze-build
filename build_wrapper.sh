@@ -11,4 +11,4 @@ mkdir -p $path/drone_pkgbuild/{repo,sources}
 chown $UGID:$UGID -R $path/drone_pkgbuild
 
 # Run real program as user $UGNAME
-sudo -E -u $UGNAME /usr/bin/maze-build
+sudo PLUGIN_REPO=$PLUGIN_REPO DRONE_WORKSPACE=$DRONE_WORKSPACE -u $UGNAME /usr/bin/maze-build
