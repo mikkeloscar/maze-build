@@ -5,19 +5,22 @@
 FROM nfnty/arch-devel:latest
 MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
 
+RUN \
+    # Update and install pkgbuild-introspection
+    pacman -Syu pkgbuild-introspection --noconfirm --ignore ca-certificates-utils && \
+    pacman -Syuw pkgbuild-introspection --noconfirm && \
+    rm /etc/ssl/certs/ca-certificates.crt && \
+    pacman -Su --noconfirm && \
+    # Clean .pacnew files
+    find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
+    # Clean pkg cache
+    find /var/cache/pacman/pkg -mindepth 1 -delete
+
 # Setup build user/group
 ENV UGID='1000' UGNAME='builder'
 RUN \
     groupadd --gid "$UGID" "$UGNAME" && \
     useradd --create-home --uid "$UGID" --gid "$UGID" --shell /usr/bin/false "${UGNAME}"
-
-RUN \
-    # Update and install pkgbuild-introspection
-    pacman -Syu pkgbuild-introspection --noconfirm && \
-    # Clean .pacnew files
-    find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
-    # Clean pkg cache
-    find /var/cache/pacman/pkg -mindepth 1 -delete
 
 # copy sudoers file
 COPY contrib/etc/sudoers /etc/sudoers
