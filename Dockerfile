@@ -46,6 +46,6 @@ ENV GIT_AUTHOR_EMAIL=maze-build GIT_AUTHOR_NAME=maze-build \
 COPY build_wrapper.sh /usr/bin/build
 
 # Add binary
-COPY maze-build /usr/bin
+COPY build/linux/maze-build /usr/bin
 
 ENTRYPOINT ["/usr/bin/build"]
