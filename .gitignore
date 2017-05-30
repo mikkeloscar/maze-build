@@ -1,2 +1,2 @@
-maze-build
-build_dir/
+build/
+vendor/
