@@ -1,25 +1,42 @@
-.PHONY: clean deps docker build
+.PHONY: clean test check build.local build.linux build.docker build.push
 
-EXECUTABLE ?= maze-build
-IMAGE      ?= mikkeloscar/$(EXECUTABLE)
-SOURCES    = $(shell find . -name '*.go')
+BINARY        ?= maze-build
+VERSION       ?= $(shell git describe --tags --always --dirty)
+IMAGE         ?= mikkeloscar/$(BINARY)
+TAG           ?= $(VERSION)
+SOURCES       = $(shell find . -name '*.go')
+DOCKERFILE    ?= Dockerfile
+GOPKGS        = $(shell go list ./... | grep -v /vendor/)
+BUILD_FLAGS   ?= -v
+LDFLAGS       ?= -X main.version=$(VERSION) -w -s
 
-all: build
+default: build.local
 
 clean:
-	go clean -i ./..
+	rm -rf build
 
-deps:
-	go get -t
+test:
+	go test -v $(GOPKGS)
 
-docker: build
-	docker build --rm -t $(IMAGE) .
+check:
+	golint $(GOPKGS)
+	go vet -v $(GOPKGS)
 
-docker-test:
-	docker build --rm -t $(IMAGE)-test -f Dockerfile.test .
-	docker run --rm $(IMAGE)-test
+build.local: build/$(BINARY)
+build.linux: build/linux/$(BINARY)
 
-$(EXECUTABLE): $(SOURCES)
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-s"
+build/$(BINARY): $(SOURCES)
+	CGO_ENABLED=0 go build -o build/$(BINARY) $(BUILD_FLAGS) -ldflags "$(LDFLAGS)" .
 
-build: $(EXECUTABLE)
+build/linux/$(BINARY): $(SOURCES)
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build $(BUILD_FLAGS) -o build/linux/$(BINARY) -ldflags "$(LDFLAGS)" .
+
+build.docker: build.linux
+	docker build --rm -t "$(IMAGE):$(TAG)" -f $(DOCKERFILE) .
+
+build.docker-test: build.linux
+	docker build --rm -t "$(IMAGE)-test:$(TAG)" -f $(DOCKERFILE).test .
+	docker run --rm "$(IMAGE)-test:$(TAG)"
+
+build.push: build.docker
+	docker push "$(IMAGE):$(TAG)"
