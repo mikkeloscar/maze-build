@@ -2,19 +2,18 @@
 #
 #     docker build --rm=true -t mikkeloscar/maze-build .
 
-FROM nfnty/arch-devel:latest
+FROM archlinux/base:latest
 MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
 
 RUN \
-    # Update and install pkgbuild-introspection
-    pacman -Syu pkgbuild-introspection --noconfirm --ignore ca-certificates-utils && \
-    pacman -Syuw pkgbuild-introspection --noconfirm && \
-    rm /etc/ssl/certs/ca-certificates.crt && \
-    pacman -Su --noconfirm && \
+    # Update and install packages
+    pacman -Syu \
+        base-devel \
+        pkgbuild-introspection \
+        git \
+        --noconfirm && \
     # Clean .pacnew files
-    find / -name "*.pacnew" -exec rename .pacnew '' '{}' \; && \
-    # Clean pkg cache
-    find /var/cache/pacman/pkg -mindepth 1 -delete
+    find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
 
 # Setup build user/group
 ENV UGID='1000' UGNAME='builder'
