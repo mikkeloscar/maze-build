@@ -8,10 +8,10 @@ services:
 
 before_install:
 - go get github.com/mattn/goveralls
-- go get github.com/Masterminds/glide
+- go get github.com/golang/dep/cmd/dep
 
 install:
-- glide install --strip-vendor
+- dep ensure -v -vendor-only
 
 script:
 - goveralls -service=travis-ci
