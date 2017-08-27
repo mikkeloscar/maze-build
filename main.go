@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 
@@ -19,7 +20,9 @@ var (
 		Origin   string
 		Package  string
 		Packager string
-		Repo     string
+		Repo     *url.URL
+		Token    string
+		Upload   bool
 		SignKey  string // TODO:
 	}
 )
@@ -28,7 +31,9 @@ func main() {
 	kingpin.Flag("origin", "Origin of the package e.g. aur or local.").Required().StringVar(&config.Origin)
 	kingpin.Flag("package", "Name of the package to build.").StringVar(&config.Package)
 	kingpin.Flag("packager", "Name used for the packager.").Default(defaultPackager).StringVar(&config.Packager)
-	kingpin.Flag("repo", "URL of upstream repo.").Envar("PLUGIN_REPO").StringVar(&config.Repo)
+	kingpin.Flag("repo", "URL of upstream repo.").Envar("PLUGIN_REPO").URLVar(&config.Repo)
+	kingpin.Flag("token", "Token used when authenticating with upstream repo.").Envar("TOKEN").StringVar(&config.Token)
+	kingpin.Flag("upload", "Specify whether to upload packages or not.").Default("false").BoolVar(&config.Upload)
 	kingpin.Parse()
 
 	// configure log
@@ -44,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	pkgRepo, err := parseRepo(config.Repo, ws.RepoPath)
+	pkgRepo, err := parseRepo(config.Repo.String(), ws.RepoPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +70,22 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(pkgs)
+	if config.Upload {
+		config.Repo.Path = ""
+
+		uploader := Uploader{
+			client: NewClientToken(config.Repo.String(), config.Token),
+			owner:  pkgRepo.local.Owner,
+			name:   pkgRepo.local.Name,
+		}
+
+		err = uploader.Do(pkgs)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// fmt.Println(pkgs)
 }
 
 type formatter struct{}
