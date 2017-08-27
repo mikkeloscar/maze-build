@@ -42,10 +42,7 @@ RUN \
 ENV GIT_AUTHOR_EMAIL=maze-build GIT_AUTHOR_NAME=maze-build \
     GIT_COMMITTER_EMAIL=maze-build GIT_COMMITTER_NAME=maze-build
 
-# Add wrapper script
-COPY build_wrapper.sh /usr/bin/build
-
 # Add binary
 COPY build/linux/maze-build /usr/bin
 
-ENTRYPOINT ["/usr/bin/build"]
+ENTRYPOINT ["/usr/bin/maze-build"]

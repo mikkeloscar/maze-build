@@ -1,6 +1,6 @@
 .PHONY: clean test check build.local build.linux build.docker build.push
 
-BINARY        ?= maze-build
+BINARY        ?= maze-build-travis
 VERSION       ?= $(shell git describe --tags --always --dirty)
 IMAGE         ?= mikkeloscar/$(BINARY)
 TAG           ?= $(VERSION)
