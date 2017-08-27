@@ -66,11 +66,6 @@ func main() {
 	}
 
 	fmt.Println(pkgs)
-
-	// err = storeBuiltPkgs(path.Join(workspace, "drone_pkgbuild", "packages.built"), pkgs)
-	// if err != nil {
-	// 	return err
-	// }
 }
 
 type formatter struct{}
@@ -104,70 +99,3 @@ func initWorkspace(workdir string) (*Workspace, error) {
 
 	return ws, nil
 }
-
-// func run() error {
-// 	vargs := ArchBuild{}
-// 	repo := os.Getenv("PLUGIN_REPO")
-// 	workspace := os.Getenv("DRONE_WORKSPACE")
-
-// 	// srcsPath := path.Join(workspace, "drone_pkgbuild", "sources")
-// 	// repoPath := path.Join(workspace, "drone_pkgbuild", "repo")
-
-// 	// repoName, repoUrl, err := splitRepoDef(vargs.Repo)
-
-// 	// pkgRepo := &Repo{
-// 	// 	name:    repoName,
-// 	// 	url:     repoUrl,
-// 	// 	workdir: repoPath,
-// 	// }
-
-// 	// // configure build
-// 	// if vargs.Packager == "" {
-// 	// 	vargs.Packager = "maze-build"
-// 	// }
-
-// 	pkgRepo, err := parseRepo(repo, repoPath)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = pkgRepo.local.InitDir()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	builder := &Builder{
-// 		workdir: srcsPath,
-// 		repo:    pkgRepo,
-// 		config:  vargs,
-// 	}
-
-// 	// aur := &AUR{srcsPath}
-
-// 	// build, err := parseBuildURLInfo(system.Link, srcsPath)
-// 	// if err != nil {
-// 	// 	return err
-// 	// }
-
-// 	buildInst, err := parseGitLog(workspace, srcsPath)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	// buildInst := &BuildInst{
-// 	// 	Pkgs: vargs.Packages,
-// 	// 	Src:  &AUR{srcsPath},
-// 	// }
-
-// 	pkgs, err := builder.BuildNew(buildInst.Pkgs, buildInst.Src)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = storeBuiltPkgs(path.Join(workspace, "drone_pkgbuild", "packages.built"), pkgs)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
