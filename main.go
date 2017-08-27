@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -23,6 +24,7 @@ var (
 		Repo     *url.URL
 		Token    string
 		Upload   bool
+		Ping     bool
 		SignKey  string // TODO:
 	}
 )
@@ -34,6 +36,7 @@ func main() {
 	kingpin.Flag("repo", "URL of upstream repo.").Envar("PLUGIN_REPO").URLVar(&config.Repo)
 	kingpin.Flag("token", "Token used when authenticating with upstream repo.").Envar("TOKEN").StringVar(&config.Token)
 	kingpin.Flag("upload", "Specify whether to upload packages or not.").Default("false").BoolVar(&config.Upload)
+	kingpin.Flag("ping", "Enables a ping log every 5 minutes to ensure build isn't timed out by travis.").Default("false").BoolVar(&config.Ping)
 	kingpin.Parse()
 
 	// configure log
@@ -65,6 +68,10 @@ func main() {
 		Packager: config.Packager,
 	}
 
+	if config.Ping {
+		go ping()
+	}
+
 	pkgs, err := builder.BuildNew([]string{config.Package}, &AUR{ws.SourcesPath})
 	if err != nil {
 		log.Fatal(err)
@@ -84,8 +91,6 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
-	// fmt.Println(pkgs)
 }
 
 type formatter struct{}
@@ -118,4 +123,11 @@ func initWorkspace(workdir string) (*Workspace, error) {
 	}
 
 	return ws, nil
+}
+
+func ping() {
+	for {
+		time.Sleep(5 * time.Minute)
+		fmt.Println("ping")
+	}
 }
