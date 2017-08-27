@@ -1,8 +1,8 @@
 .PHONY: clean test check build.local build.linux build.docker build.push
 
-BINARY        ?= maze-build-travis
+BINARY        ?= maze-build
 VERSION       ?= $(shell git describe --tags --always --dirty)
-IMAGE         ?= mikkeloscar/$(BINARY)
+IMAGE         ?= mikkeloscar/$(BINARY)-travis
 TAG           ?= $(VERSION)
 SOURCES       = $(shell find . -name '*.go')
 DOCKERFILE    ?= Dockerfile
