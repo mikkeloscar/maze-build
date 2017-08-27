@@ -75,7 +75,7 @@ func TestUpdateBuild(t *testing.T) {
 	assert.NoError(t, err, "should not fail")
 }
 
-func TestupdatePkgSrc(t *testing.T) {
+func TestUpdatePkgSrc(t *testing.T) {
 	if os.Getenv("DOCKER_TEST") != "1" {
 		return
 	}

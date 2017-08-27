@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"path"
 
@@ -107,21 +108,21 @@ func (a *AUR) getSourceRepos(pkgs map[string]struct{}) error {
 		go a.updateRepo(pkg, clone)
 	}
 
-	var errors []error
+	var errs []error
 
 	for range pkgs {
 		err := <-clone
 		if err != nil {
-			errors = append(errors, err)
+			errs = append(errs, err)
 		}
 	}
 
-	if len(errors) > 0 {
+	if len(errs) > 0 {
 		msg := "errors while fetching sources: from AUR\n"
-		for _, err := range errors {
+		for _, err := range errs {
 			msg += fmt.Sprintf("%s * %s\n", msg, err.Error())
 		}
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	return nil

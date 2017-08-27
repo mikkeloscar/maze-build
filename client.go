@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -105,7 +106,7 @@ func (c *client) doRaw(rawurl, method string, in, out interface{}) error {
 
 	if resp.StatusCode > 208 {
 		out, _ := ioutil.ReadAll(resp.Body)
-		return fmt.Errorf(string(out))
+		return errors.New(string(out))
 	}
 
 	if out != nil {
