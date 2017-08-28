@@ -33,7 +33,12 @@ func NewClient(uri string) *client {
 }
 
 func NewClientToken(uri, token string) *client {
-	auther := oauth2.NewClient(oauth2.NoContext, StaticTokenSource(&oauth2.Token{AccessToken: token}))
+	auther := oauth2.NewClient(
+		oauth2.NoContext,
+		oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		),
+	)
 	return &client{auther, uri}
 }
 
