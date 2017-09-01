@@ -2,8 +2,7 @@
 #
 #     docker build --rm=true -t mikkeloscar/maze-build .
 
-# FROM archlinux/base:latest
-FROM mikkeloscar/archlinux:latest
+FROM archlinux/base:latest
 MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
 
 RUN \
