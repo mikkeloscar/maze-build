@@ -1,4 +1,3 @@
-Server = https://mirror.ubrco.de/archlinux/$repo/os/$arch
 Server = https://arch.jensgutermuth.de/$repo/os/$arch
 Server = https://mirror.vfn-nrw.de/archlinux/$repo/os/$arch
 Server = https://mirror.js-webcoding.de/pub/archlinux/$repo/os/$arch
