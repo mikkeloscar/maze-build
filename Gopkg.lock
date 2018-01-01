@@ -41,7 +41,7 @@
   branch = "master"
   name = "github.com/mikkeloscar/gopkgbuild"
   packages = ["."]
-  revision = "46d010163d87513b0f05fb67400475348bd50cc9"
+  revision = "a8070a8ab45a0f8cd4201ca7ed0f3efe4897bd2f"
 
 [[projects]]
   branch = "master"

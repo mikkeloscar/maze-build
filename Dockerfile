@@ -9,7 +9,6 @@ RUN \
     # Update and install packages
     pacman -Syu \
         base-devel \
-        pkgbuild-introspection \
         git \
         --noconfirm && \
     # Clean .pacnew files

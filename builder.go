@@ -160,16 +160,14 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("mksrcinfo")
+	cmd := exec.Command("makepkg", "--printsrcinfo")
 	cmd.Dir = pkg.Path
-	err = cmd.Run()
+	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
 
-	filePath := path.Join(pkg.Path, ".SRCINFO")
-
-	pkgb, err := pkgbuild.ParseSRCINFO(filePath)
+	pkgb, err := pkgbuild.ParseSRCINFOContent(out)
 	if err != nil {
 		return nil, err
 	}
