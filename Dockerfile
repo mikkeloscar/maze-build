@@ -2,15 +2,13 @@
 #
 #     docker build --rm=true -t mikkeloscar/maze-build .
 
-# FROM archlinux/base:latest
-FROM mikkeloscar/archlinux:latest
+FROM archlinux/base:latest
 MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
 
 RUN \
     # Update and install packages
     pacman -Syu \
         base-devel \
-        pkgbuild-introspection \
         git \
         --noconfirm && \
     # Clean .pacnew files
@@ -42,10 +40,7 @@ RUN \
 ENV GIT_AUTHOR_EMAIL=maze-build GIT_AUTHOR_NAME=maze-build \
     GIT_COMMITTER_EMAIL=maze-build GIT_COMMITTER_NAME=maze-build
 
-# Add wrapper script
-COPY build_wrapper.sh /usr/bin/build
-
 # Add binary
 COPY build/linux/maze-build /usr/bin
 
-ENTRYPOINT ["/usr/bin/build"]
+ENTRYPOINT ["/usr/bin/maze-build"]

@@ -3,28 +3,93 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"os"
 	"path"
+	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
-// ArchBuild defines the config options passed from .drone.yml.
-type ArchBuild struct {
-	SignKey  string `json:"sign_key"`
-	Packager string `json:"packager"`
-	// temp
-	// Packages []string `json:"packages"`
-}
+const (
+	defaultPackager = "maze-build"
+)
+
+var (
+	config struct {
+		Origin   string
+		Package  string
+		Packager string
+		Repo     *url.URL
+		Token    string
+		Upload   bool
+		Ping     bool
+		SignKey  string // TODO:
+	}
+)
 
 func main() {
+	kingpin.Flag("origin", "Origin of the package e.g. aur or local.").Required().StringVar(&config.Origin)
+	kingpin.Flag("package", "Name of the package to build.").StringVar(&config.Package)
+	kingpin.Flag("packager", "Name used for the packager.").Default(defaultPackager).StringVar(&config.Packager)
+	kingpin.Flag("repo", "URL of upstream repo.").Envar("PLUGIN_REPO").URLVar(&config.Repo)
+	kingpin.Flag("token", "Token used when authenticating with upstream repo.").Envar("TOKEN").StringVar(&config.Token)
+	kingpin.Flag("upload", "Specify whether to upload packages or not.").Default("false").BoolVar(&config.Upload)
+	kingpin.Flag("ping", "Enables a ping log every 5 minutes to ensure build isn't timed out by travis.").Default("false").BoolVar(&config.Ping)
+	kingpin.Parse()
+
 	// configure log
 	log.SetFormatter(new(formatter))
 
-	err := run()
+	wd, err := os.Getwd()
 	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+		log.Fatal(err)
+	}
+
+	ws, err := initWorkspace(wd)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pkgRepo, err := parseRepo(config.Repo.String(), ws.RepoPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pkgRepo.local.InitDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	builder := &Builder{
+		workdir:  ws.SourcesPath,
+		repo:     pkgRepo,
+		Packager: config.Packager,
+	}
+
+	if config.Ping {
+		go ping()
+	}
+
+	pkgs, err := builder.BuildNew([]string{config.Package}, &AUR{ws.SourcesPath})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if config.Upload {
+		config.Repo.Path = ""
+
+		uploader := Uploader{
+			client: NewClientToken(config.Repo.String(), config.Token),
+			owner:  pkgRepo.local.Owner,
+			name:   pkgRepo.local.Name,
+		}
+
+		err = uploader.Do(pkgs)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -36,69 +101,33 @@ func (f *formatter) Format(entry *log.Entry) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func run() error {
-	vargs := ArchBuild{}
-	repo := os.Getenv("PLUGIN_REPO")
-	workspace := os.Getenv("DRONE_WORKSPACE")
+type Workspace struct {
+	SourcesPath string
+	RepoPath    string
+}
 
-	srcsPath := path.Join(workspace, "drone_pkgbuild", "sources")
-	repoPath := path.Join(workspace, "drone_pkgbuild", "repo")
-
-	// repoName, repoUrl, err := splitRepoDef(vargs.Repo)
-
-	// pkgRepo := &Repo{
-	// 	name:    repoName,
-	// 	url:     repoUrl,
-	// 	workdir: repoPath,
-	// }
-
-	// configure build
-	if vargs.Packager == "" {
-		vargs.Packager = "maze-build"
+func initWorkspace(workdir string) (*Workspace, error) {
+	ws := &Workspace{
+		SourcesPath: path.Join(workdir, "sources"),
+		RepoPath:    path.Join(workdir, "repo"),
 	}
 
-	pkgRepo, err := parseRepo(repo, repoPath)
+	err := os.MkdirAll(ws.SourcesPath, 0755)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = pkgRepo.local.InitDir()
+	err = os.MkdirAll(ws.RepoPath, 0755)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	builder := &Builder{
-		workdir: srcsPath,
-		repo:    pkgRepo,
-		config:  vargs,
+	return ws, nil
+}
+
+func ping() {
+	for {
+		time.Sleep(5 * time.Minute)
+		fmt.Println("ping")
 	}
-
-	// aur := &AUR{srcsPath}
-
-	// build, err := parseBuildURLInfo(system.Link, srcsPath)
-	// if err != nil {
-	// 	return err
-	// }
-
-	buildInst, err := parseGitLog(workspace, srcsPath)
-	if err != nil {
-		return err
-	}
-
-	// buildInst := &BuildInst{
-	// 	Pkgs: vargs.Packages,
-	// 	Src:  &AUR{srcsPath},
-	// }
-
-	pkgs, err := builder.BuildNew(buildInst.Pkgs, buildInst.Src)
-	if err != nil {
-		return err
-	}
-
-	err = storeBuiltPkgs(path.Join(workspace, "drone_pkgbuild", "packages.built"), pkgs)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

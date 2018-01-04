@@ -9,8 +9,8 @@ import (
 	"path"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/mikkeloscar/gopkgbuild"
+	log "github.com/sirupsen/logrus"
 )
 
 // BuiltPkg defines a built package and optional signature file.
@@ -29,9 +29,9 @@ func (b *BuiltPkg) String() string {
 
 // Builder is used to build arch packages.
 type Builder struct {
-	workdir string
-	repo    *Repo
-	config  ArchBuild
+	workdir  string
+	repo     *Repo
+	Packager string
 }
 
 // BuildNew checks what packages to build based on related repo and builds
@@ -160,16 +160,14 @@ func (b *Builder) updatePkgSrc(pkg *SrcPkg) (*SrcPkg, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("mksrcinfo")
+	cmd := exec.Command("makepkg", "--printsrcinfo")
 	cmd.Dir = pkg.Path
-	err = cmd.Run()
+	out, err := cmd.Output()
 	if err != nil {
 		return nil, err
 	}
 
-	filePath := path.Join(pkg.Path, ".SRCINFO")
-
-	pkgb, err := pkgbuild.ParseSRCINFO(filePath)
+	pkgb, err := pkgbuild.ParseSRCINFOContent(out)
 	if err != nil {
 		return nil, err
 	}
@@ -205,9 +203,9 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	}
 
 	var env []string
-	if b.config.Packager != "" {
+	if b.Packager != "" {
 		env = os.Environ()
-		env = append(env, fmt.Sprintf("PACKAGER=%s", b.config.Packager))
+		env = append(env, fmt.Sprintf("PACKAGER=%s", b.Packager))
 	}
 
 	err := runCmd(pkg.Path, env, "makepkg", "--install", "--syncdeps", "--noconfirm")

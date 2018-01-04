@@ -2,11 +2,11 @@
 
 BINARY        ?= maze-build
 VERSION       ?= $(shell git describe --tags --always --dirty)
-IMAGE         ?= mikkeloscar/$(BINARY)
+IMAGE         ?= mikkeloscar/$(BINARY)-travis
 TAG           ?= $(VERSION)
 SOURCES       = $(shell find . -name '*.go')
 DOCKERFILE    ?= Dockerfile
-GOPKGS        = $(shell go list ./... | grep -v /vendor/)
+GOPKGS        = $(shell go list ./...)
 BUILD_FLAGS   ?= -v
 LDFLAGS       ?= -X main.version=$(VERSION) -w -s
 

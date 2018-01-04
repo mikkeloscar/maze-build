@@ -119,31 +119,6 @@ func TestGitClone(t *testing.T) {
 	assert.NoError(t, err, "should not fail")
 }
 
-func TestParseGitLog(t *testing.T) {
-	// setup git environment
-	env := os.Environ()
-	env = append(env, "GIT_COMMITTER_EMAIL=test")
-	env = append(env, "GIT_COMMITTER_NAME=test")
-	env = append(env, "GIT_AUTHOR_EMAIL=test")
-	env = append(env, "GIT_AUTHOR_NAME=test")
-	// create new empty commit
-	cmd := exec.Command("git", "commit", "--allow-empty", "-m", "update:sway-git:aur")
-	cmd.Env = env
-	err := cmd.Run()
-	assert.NoError(t, err, "should not fail")
-	buildInst, err := parseGitLog("", "")
-	assert.NoError(t, err, "should not fail")
-	assert.Len(t, buildInst.Pkgs, 1, "should have one element")
-	assert.Equal(t, "sway-git", buildInst.Pkgs[0], "should be equal")
-	assert.NotNil(t, buildInst.Src, "should no be nil")
-
-	// reset git log
-	cmd = exec.Command("git", "reset", "HEAD^")
-	err = cmd.Run()
-	cmd.Env = env
-	assert.NoError(t, err, "should not fail")
-}
-
 func TestParseRepo(t *testing.T) {
 	r, err := parseRepo("name=http://example.com/repo/path", "")
 	assert.NoError(t, err, "should not fail")
