@@ -13,6 +13,7 @@ before_install:
 - go get github.com/mattn/goveralls
 
 script:
+- make
 - goveralls -service=travis-ci
 - docker login -u $DOCKER_USER -p $DOCKER_PASS
 - VERSION=latest make build.push
