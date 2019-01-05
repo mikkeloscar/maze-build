@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var a = AUR{baseDir}
@@ -14,27 +14,25 @@ func TestGetDeps(t *testing.T) {
 	deps := make(map[string]struct{})
 
 	err := a.getDeps([]string{"sway-git"}, deps)
-	assert.NoError(t, err)
-	assert.Len(t, deps, 4)
-	_, ok := deps["sway-git"]
-	assert.True(t, ok)
-	_, ok = deps["wlroots-git"]
-	assert.True(t, ok)
+	require.NoError(t, err)
+	require.Len(t, deps, 2)
+	require.Contains(t, deps, "sway-git")
+	require.Contains(t, deps, "wlroots-git")
 
 	deps = make(map[string]struct{})
 	err = a.getDeps([]string{"virtualbox-host-modules-mainline"}, deps)
-	assert.NoError(t, err)
-	assert.Len(t, deps, 2)
+	require.NoError(t, err)
+	require.Len(t, deps, 2)
 
 	err = os.RemoveAll(baseDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 // Test Getting sources from AUR.
 func TestAURGet(t *testing.T) {
 	_, err := a.Get([]string{"sway-git"})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	err = os.RemoveAll(baseDir)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
