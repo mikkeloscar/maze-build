@@ -15,3 +15,5 @@ require (
 	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
+
+go 1.13
