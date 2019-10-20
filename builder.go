@@ -7,10 +7,16 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 
-	"github.com/mikkeloscar/gopkgbuild"
+	pkgbuild "github.com/mikkeloscar/gopkgbuild"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	pkgPatt    = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.xz`)
+	pkgSigPatt = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.xz.sig`)
 )
 
 // BuiltPkg defines a built package and optional signature file.
@@ -221,7 +227,7 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	pkgs := make([]*BuiltPkg, 0, 1)
 
 	for _, f := range files {
-		if strings.HasSuffix(f.Name(), "pkg.tar.xz") {
+		if pkgPatt.MatchString(f.Name()) {
 			builtPkg := &BuiltPkg{
 				Package: path.Join(pkg.Path, f.Name()),
 			}
@@ -230,7 +236,7 @@ func (b *Builder) buildPkg(pkg *SrcPkg) ([]*BuiltPkg, error) {
 	}
 
 	for _, f := range files {
-		if strings.HasSuffix(f.Name(), "pkg.tar.xz.sig") {
+		if pkgSigPatt.MatchString(f.Name()) {
 			for _, p := range pkgs {
 				if path.Base(p.Package) == f.Name()[:len(f.Name())-4] {
 					p.Signature = path.Join(pkg.Path, f.Name())
