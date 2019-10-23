@@ -35,9 +35,10 @@ func (b *BuiltPkg) String() string {
 
 // Builder is used to build arch packages.
 type Builder struct {
-	workdir  string
-	repo     *Repo
-	Packager string
+	workdir     string
+	repo        *Repo
+	Packager    string
+	SigningKeys []string
 }
 
 // BuildNew checks what packages to build based on related repo and builds
@@ -45,6 +46,11 @@ type Builder struct {
 func (b *Builder) BuildNew(pkgs []string, aur *AUR) ([]*BuiltPkg, error) {
 	// initialize pacman.conf with upstream repo
 	err := b.setup()
+	if err != nil {
+		return nil, err
+	}
+
+	err = b.addSigningKeys()
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +101,16 @@ func (b *Builder) setup() error {
 	}
 
 	return addPacmanConf("/etc/pacman.conf.template")
+}
+
+func (b *Builder) addSigningKeys() error {
+	if len(b.SigningKeys) == 0 {
+		return nil
+	}
+
+	args := []string{"--receive-keys"}
+	args = append(args, b.SigningKeys...)
+	return runCmd(b.workdir, nil, "gpg", args...)
 }
 
 // Update build environment.

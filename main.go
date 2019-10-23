@@ -18,14 +18,14 @@ const (
 
 var (
 	config struct {
-		Origin   string
-		Package  string
-		Packager string
-		Repo     *url.URL
-		Token    string
-		Upload   bool
-		Ping     bool
-		SignKey  string // TODO:
+		Origin      string
+		Package     string
+		Packager    string
+		Repo        *url.URL
+		Token       string
+		Upload      bool
+		Ping        bool
+		SigningKeys []string // TODO:
 	}
 )
 
@@ -33,10 +33,11 @@ func main() {
 	kingpin.Flag("origin", "Origin of the package e.g. aur or local.").Required().StringVar(&config.Origin)
 	kingpin.Flag("package", "Name of the package to build.").StringVar(&config.Package)
 	kingpin.Flag("packager", "Name used for the packager.").Default(defaultPackager).StringVar(&config.Packager)
-	kingpin.Flag("repo", "URL of upstream repo.").Envar("PLUGIN_REPO").URLVar(&config.Repo)
+	kingpin.Flag("repo", "URL of upstream repo.").Required().Envar("PLUGIN_REPO").URLVar(&config.Repo)
 	kingpin.Flag("token", "Token used when authenticating with upstream repo.").Envar("TOKEN").StringVar(&config.Token)
 	kingpin.Flag("upload", "Specify whether to upload packages or not.").Default("false").BoolVar(&config.Upload)
 	kingpin.Flag("ping", "Enables a ping log every 5 minutes to ensure build isn't timed out by travis.").Default("false").BoolVar(&config.Ping)
+	kingpin.Flag("signing-key", "Add signing key to the environment before building packages.").StringsVar(&config.SigningKeys)
 	kingpin.Parse()
 
 	// configure log
@@ -63,9 +64,10 @@ func main() {
 	}
 
 	builder := &Builder{
-		workdir:  ws.SourcesPath,
-		repo:     pkgRepo,
-		Packager: config.Packager,
+		workdir:     ws.SourcesPath,
+		repo:        pkgRepo,
+		Packager:    config.Packager,
+		SigningKeys: config.SigningKeys,
 	}
 
 	if config.Ping {
