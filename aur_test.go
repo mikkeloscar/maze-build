@@ -23,7 +23,7 @@ func TestGetDeps(t *testing.T) {
 	deps = make(map[string]struct{})
 	err = a.getDeps([]string{"virtualbox-host-modules-mainline"}, deps)
 	require.NoError(t, err)
-	require.Len(t, deps, 2)
+	require.Len(t, deps, 3)
 
 	err = os.RemoveAll(baseDir)
 	require.NoError(t, err)
