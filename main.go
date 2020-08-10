@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	defaultPackager = "maze-build"
+	defaultPackager = "Maze Build <builder@maze-ci.org>"
 )
 
 var (
