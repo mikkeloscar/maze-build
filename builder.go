@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	pkgPatt    = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.xz`)
-	pkgSigPatt = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.xz.sig`)
+	pkgPatt    = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.(xz|zst)`)
+	pkgSigPatt = regexp.MustCompile(`([a-z\d@._+]+[a-z\d@._+-]+)-((\d+:)?([\da-z\._+]+-\d+))-(i686|x86_64|any).pkg.tar.(xz|zst).sig`)
 )
 
 // BuiltPkg defines a built package and optional signature file.
