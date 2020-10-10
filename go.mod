@@ -1,19 +1,19 @@
 module github.com/mikkeloscar/maze-build
 
 require (
-	github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc // indirect
-	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
-	github.com/kr/pty v1.1.3
-	github.com/mikkeloscar/aur v0.0.0-20180725140122-f998dbf94dc4
-	github.com/mikkeloscar/gopkgbuild v0.0.0-20180615131628-2bb4f1f1db67
-	github.com/mikkeloscar/maze v0.0.0-20181007142116-7cc8eb14ba93
-	github.com/sirupsen/logrus v1.1.0
-	github.com/stretchr/testify v1.2.2
-	golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4 // indirect
-	golang.org/x/oauth2 v0.0.0-20181003184128-c57b0facaced
-	golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
+	github.com/creack/pty v1.1.11 // indirect
+	github.com/kr/pty v1.1.8
+	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
+	github.com/mikkeloscar/gopkgbuild v0.0.0-20201010175455-2582c34596c6
+	github.com/mikkeloscar/maze v0.0.0-20200811065415-11dea6db2d77
+	github.com/sirupsen/logrus v1.7.0
+	github.com/stretchr/testify v1.4.0
+	golang.org/x/net v0.0.0-20201009032441-dbdefad45b89 // indirect
+	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
+	golang.org/x/sys v0.0.0-20201009025420-dfb3f7c4e634 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
 
-go 1.13
+go 1.15
