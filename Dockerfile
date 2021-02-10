@@ -3,7 +3,14 @@
 #     docker build --rm=true -t mikkeloscar/maze-build .
 
 FROM archlinux:latest
-MAINTAINER Mikkel Oscar Lyderik Larsen <m@moscar.net>
+LABEL maintainer="Mikkel Oscar Lyderik Larsen <m@moscar.net>"
+
+# WORKAROUND for glibc 2.33 and old Docker
+# See https://github.com/actions/virtual-environments/issues/2658
+# Thanks to https://github.com/lxqt/lxqt-panel/pull/1562
+RUN curl -fsSL \
+    "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" \
+    | bsdtar -C / -xvf -
 
 RUN \
     # Update and install packages
