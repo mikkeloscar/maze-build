@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -22,10 +21,9 @@ func TestGetDeps(t *testing.T) {
 	require.Contains(t, deps, "wlroots-git")
 
 	deps = make(map[string]struct{})
-	err = a.getDeps([]string{"virtualbox-host-modules-mainline"}, deps)
+	err = a.getDeps([]string{"google-cloud-sdk"}, deps)
 	require.NoError(t, err)
-	fmt.Println(deps)
-	require.Len(t, deps, 2)
+	require.Len(t, deps, 1)
 
 	err = os.RemoveAll(baseDir)
 	require.NoError(t, err)

@@ -16,7 +16,7 @@ clean:
 	rm -rf build
 
 test:
-	go test -v $(GOPKGS)
+	go test -v -coverprofile=profile.cov $(GOPKGS)
 
 check:
 	golint $(GOPKGS)
