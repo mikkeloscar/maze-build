@@ -17,6 +17,7 @@ RUN \
     pacman -Syu \
         base-devel \
         git \
+        jq \
         --noconfirm && \
     # Clean .pacnew files
     find / -name "*.pacnew" -exec rename .pacnew '' '{}' \;
