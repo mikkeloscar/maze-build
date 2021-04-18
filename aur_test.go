@@ -15,10 +15,11 @@ func TestGetDeps(t *testing.T) {
 
 	err := a.getDeps([]string{"sway-git"}, deps)
 	require.NoError(t, err)
-	require.Len(t, deps, 3)
+	require.Len(t, deps, 4)
 	require.Contains(t, deps, "sway-git")
 	require.Contains(t, deps, "swaybg-git")
 	require.Contains(t, deps, "wlroots-git")
+	require.Contains(t, deps, "seatd")
 
 	deps = make(map[string]struct{})
 	err = a.getDeps([]string{"google-cloud-sdk"}, deps)
