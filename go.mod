@@ -6,7 +6,7 @@ require (
 	github.com/creack/pty v1.1.11 // indirect
 	github.com/kr/pty v1.1.8
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
-	github.com/mikkeloscar/gopkgbuild v0.0.0-20201010175455-2582c34596c6
+	github.com/mikkeloscar/gopkgbuild v0.0.0-20211012125930-1f52fd970155
 	github.com/mikkeloscar/maze v0.0.0-20200811065415-11dea6db2d77
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.4.0
