@@ -6,7 +6,7 @@ require (
 	github.com/mikkeloscar/gopkgbuild v0.0.0-20211012125930-1f52fd970155
 	github.com/mikkeloscar/maze v0.0.0-20231219084801-baacc72b4036
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/oauth2 v0.18.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
