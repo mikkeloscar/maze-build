@@ -8,7 +8,7 @@ require (
 	github.com/mikkeloscar/maze v0.0.0-20240419142251-cdc9c58d1021
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
@@ -24,3 +24,4 @@ require (
 )
 
 go 1.22
+toolchain go1.23.6
