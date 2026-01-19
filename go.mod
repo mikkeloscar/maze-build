@@ -6,7 +6,7 @@ require (
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/mikkeloscar/gopkgbuild v0.0.0-20211012125930-1f52fd970155
 	github.com/mikkeloscar/maze v0.0.0-20250822133658-b4a1ca55fea6
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.34.0
 )
